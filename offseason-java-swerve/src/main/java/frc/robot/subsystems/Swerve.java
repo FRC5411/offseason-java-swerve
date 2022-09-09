@@ -48,10 +48,10 @@ public class Swerve extends SubsystemBase {
   private double BR_Target = 0.0;
 
   // swerve module wheel speeds (percent output)
-  private double FL_Speed = 0.0;
-  private double FR_Speed = 0.0;
-  private double BL_Speed = 0.0;
-  private double BR_Speed = 0.0;
+  private double FL_Power = 0.0;
+  private double FR_Power = 0.0;
+  private double BL_Power = 0.0;
+  private double BR_Power = 0.0;
 
   // swerve module vector components
   private double FL_X = 0.0;
@@ -64,10 +64,16 @@ public class Swerve extends SubsystemBase {
   private double BR_Y = 0.0;
 
   // 'actual' read positions of each swerve module (degrees)
-  private double FL_Actual = 0.0;
-  private double FR_Actual = 0.0;
-  private double BL_Actual = 0.0;
-  private double BR_Actual = 0.0;
+  private double FL_Actual_Position = 0.0;
+  private double FR_Actual_Position = 0.0;
+  private double BL_Actual_Position = 0.0;
+  private double BR_Actual_Position = 0.0;
+
+  // 'actual' read speeds of each swerve module (feet per second)
+  private double FL_Actual_Speed = 0.0;
+  private double FR_Actual_Speed = 0.0;
+  private double BL_Actual_Speed = 0.0;
+  private double BR_Actual_Speed = 0.0;
 
   // temp variables used to determine the most efficient path for each module
   private double _Path_1 = 0.0;
@@ -89,6 +95,10 @@ public class Swerve extends SubsystemBase {
   public static final double ROBOT_LENGTH = 31.0;
   // width = side to side (inches)
   public static final double ROBOT_WIDTH = 28.0;
+  // wheel diameter (inches)
+  public static final double WHEEL_DIAMETER = 0;
+  // drive gear ratio
+  public static final double DRIVE_GEAR_RATIO = 1;
 
   // constants for calculating rotation vector
   private static final double ROTATION_Y = Math.sin(Math.atan2(ROBOT_LENGTH, ROBOT_WIDTH));
@@ -217,24 +227,34 @@ public class Swerve extends SubsystemBase {
     // This method will be called once per scheduler run
 
     // 'actual' read sensor positions of each module
-    FL_Actual = (FL_Azimuth.getSelectedSensorPosition() / 4096) * 360;
-    FR_Actual = (FR_Azimuth.getSelectedSensorPosition() / 4096) * 360;
-    BL_Actual = (BL_Azimuth.getSelectedSensorPosition() / 4096) * 360;
-    BR_Actual = (BR_Azimuth.getSelectedSensorPosition() / 4096) * 360;
+    FL_Actual_Position = (FL_Azimuth.getSelectedSensorPosition() / 4096) * 360;
+    FR_Actual_Position = (FR_Azimuth.getSelectedSensorPosition() / 4096) * 360;
+    BL_Actual_Position = (BL_Azimuth.getSelectedSensorPosition() / 4096) * 360;
+    BR_Actual_Position = (BR_Azimuth.getSelectedSensorPosition() / 4096) * 360;
+
+    // 'actual' read encoder speeds per module (feet per second)
+    FL_Actual_Speed = (FL_Drive.getSelectedSensorVelocity() / 4096) * 10 * DRIVE_GEAR_RATIO * Math.PI * (WHEEL_DIAMETER / 12.0);
+    FR_Actual_Speed = (FR_Drive.getSelectedSensorVelocity() / 4096) * 10 * DRIVE_GEAR_RATIO * Math.PI * (WHEEL_DIAMETER / 12.0);
+    BL_Actual_Speed = (BL_Drive.getSelectedSensorVelocity() / 4096) * 10 * DRIVE_GEAR_RATIO * Math.PI * (WHEEL_DIAMETER / 12.0);
+    BR_Actual_Speed = (BR_Drive.getSelectedSensorVelocity() / 4096) * 10 * DRIVE_GEAR_RATIO * Math.PI * (WHEEL_DIAMETER / 12.0);
 
     // dashboard data
     Telemetry.setValue("drivetrain/FL/Azimuth_Target", FL_Target);
     Telemetry.setValue("drivetrain/FR/Azimuth_Target", FR_Target);
     Telemetry.setValue("drivetrain/BL/Azimuth_Target", BL_Target);
     Telemetry.setValue("drivetrain/BR/Azimuth_Target", BR_Target);
-    Telemetry.setValue("drivetrain/FL/Drive_Speed", FL_Speed);
-    Telemetry.setValue("drivetrain/FR/Drive_Speed", FR_Speed);
-    Telemetry.setValue("drivetrain/BL/Drive_Speed", BL_Speed);
-    Telemetry.setValue("drivetrain/BR/Drive_Speed", BR_Speed);
-    Telemetry.setValue("drivetrain/FL/Azimuth_Actual", FL_Actual);
-    Telemetry.setValue("drivetrain/FR/Azimuth_Actual", FR_Actual);
-    Telemetry.setValue("drivetrain/BL/Azimuth_Actual", BL_Actual);
-    Telemetry.setValue("drivetrain/BR/Azimuth_Actual", BR_Actual);
+    Telemetry.setValue("drivetrain/FL/Drive_Power", FL_Power);
+    Telemetry.setValue("drivetrain/FR/Drive_Power", FR_Power);
+    Telemetry.setValue("drivetrain/BL/Drive_Power", BL_Power);
+    Telemetry.setValue("drivetrain/BR/Drive_Power", BR_Power);
+    Telemetry.setValue("drivetrain/FL/Azimuth_Actual_Position", FL_Actual_Position);
+    Telemetry.setValue("drivetrain/FR/Azimuth_Actual_Position", FR_Actual_Position);
+    Telemetry.setValue("drivetrain/BL/Azimuth_Actual_Position", BL_Actual_Position);
+    Telemetry.setValue("drivetrain/BR/Azimuth_Actual_Position", BR_Actual_Position);
+    Telemetry.setValue("drivetrain/FL/Azimuth_Actual_Speed", FL_Actual_Speed);
+    Telemetry.setValue("drivetrain/FR/Azimuth_Actual_Speed", FR_Actual_Speed);
+    Telemetry.setValue("drivetrain/BL/Azimuth_Actual_Speed", BL_Actual_Speed);
+    Telemetry.setValue("drivetrain/BR/Azimuth_Actual_Speed", BR_Actual_Speed);
     Telemetry.setValue("drivetrain/FL/Drive_Temp", FL_Drive.getTemperature());
     Telemetry.setValue("drivetrain/FR/Drive_Temp", FR_Drive.getTemperature());
     Telemetry.setValue("drivetrain/BL/Drive_Temp", BL_Drive.getTemperature());
@@ -251,15 +271,15 @@ public class Swerve extends SubsystemBase {
     Telemetry.setValue("drivetrain/kinematics/robot/forward", 0);
     Telemetry.setValue("drivetrain/kinematics/robot/rightward", 0);
     Telemetry.setValue("drivetrain/kinematics/rotation", 0);
-    Telemetry.setValue("drivetrain/kinematics/field/ds-away", 0);
-    Telemetry.setValue("drivetrain/kinematics/field/ds-right", 0);
+    Telemetry.setValue("drivetrain/kinematics/field/DS_away", 0);
+    Telemetry.setValue("drivetrain/kinematics/field/DS_right", 0);
 
     //TODO: odometry math + variables
 
     Telemetry.setValue("drivetrain/odometry/robot/forward", 0);
     Telemetry.setValue("drivetrain/odometry/robot/rightward", 0);
-    Telemetry.setValue("drivetrain/odometry/field/ds-away", 0);
-    Telemetry.setValue("drivetrain/odometry/field/ds-right", 0);
+    Telemetry.setValue("drivetrain/odometry/field/DS_away", 0);
+    Telemetry.setValue("drivetrain/odometry/field/DS_right", 0);
 
   }
 
@@ -272,14 +292,18 @@ public class Swerve extends SubsystemBase {
     Telemetry.setValue("drivetrain/FR/Azimuth_Target", FR_Target);
     Telemetry.setValue("drivetrain/BL/Azimuth_Target", BL_Target);
     Telemetry.setValue("drivetrain/BR/Azimuth_Target", BR_Target);
-    Telemetry.setValue("drivetrain/FL/Drive_Speed", FL_Speed);
-    Telemetry.setValue("drivetrain/FR/Drive_Speed", FR_Speed);
-    Telemetry.setValue("drivetrain/BL/Drive_Speed", BL_Speed);
-    Telemetry.setValue("drivetrain/BR/Drive_Speed", BR_Speed);
-    Telemetry.setValue("drivetrain/FL/Azimuth_Actual", FL_Actual);
-    Telemetry.setValue("drivetrain/FR/Azimuth_Actual", FR_Actual);
-    Telemetry.setValue("drivetrain/BL/Azimuth_Actual", BL_Actual);
-    Telemetry.setValue("drivetrain/BR/Azimuth_Actual", BR_Actual);
+    Telemetry.setValue("drivetrain/FL/Drive_Power", FL_Power);
+    Telemetry.setValue("drivetrain/FR/Drive_Power", FR_Power);
+    Telemetry.setValue("drivetrain/BL/Drive_Power", BL_Power);
+    Telemetry.setValue("drivetrain/BR/Drive_Power", BR_Power);
+    Telemetry.setValue("drivetrain/FL/Azimuth_Actual_Position", FL_Actual_Position);
+    Telemetry.setValue("drivetrain/FR/Azimuth_Actual_Position", FR_Actual_Position);
+    Telemetry.setValue("drivetrain/BL/Azimuth_Actual_Position", BL_Actual_Position);
+    Telemetry.setValue("drivetrain/BR/Azimuth_Actual_Position", BR_Actual_Position);
+    Telemetry.setValue("drivetrain/FL/Azimuth_Actual_Speed", FL_Actual_Speed);
+    Telemetry.setValue("drivetrain/FR/Azimuth_Actual_Speed", FR_Actual_Speed);
+    Telemetry.setValue("drivetrain/BL/Azimuth_Actual_Speed", BL_Actual_Speed);
+    Telemetry.setValue("drivetrain/BR/Azimuth_Actual_Speed", BR_Actual_Speed);
     Telemetry.setValue("drivetrain/FL/Drive_Temp", FL_Drive.getTemperature());
     Telemetry.setValue("drivetrain/FR/Drive_Temp", FR_Drive.getTemperature());
     Telemetry.setValue("drivetrain/BL/Drive_Temp", BL_Drive.getTemperature());
@@ -308,7 +332,7 @@ public class Swerve extends SubsystemBase {
     FL_Y = LY + (ROTATION_Y * RX);
 
     // pythagorean theorum to find magnitude of resultant vector
-    FL_Speed = Math.hypot(FL_X, FL_Y);
+    FL_Power = Math.hypot(FL_X, FL_Y);
     // arctan to find angle of resulatant vector, then correct for quadrant
     FL_Target = (Math.toDegrees(Math.atan2(FL_Y, FL_X)) + (LY < 0 ? 360 : 0)) % 360;
 
@@ -318,7 +342,7 @@ public class Swerve extends SubsystemBase {
     FR_Y = LY - (ROTATION_Y * RX);
 
     // pythagorean theorum to find magnitude of resultant vector
-    FR_Speed = Math.hypot(FR_X, FR_Y);
+    FR_Power = Math.hypot(FR_X, FR_Y);
     // arctan to find angle of resulatant vector, then correct for quadrant
     FR_Target = (Math.toDegrees(Math.atan2(FR_Y, FR_X)) + (LY < 0 ? 360 : 0)) % 360;
 
@@ -328,7 +352,7 @@ public class Swerve extends SubsystemBase {
     BL_Y = LY + (ROTATION_Y * RX);
 
     // pythagorean theorum to find magnitude of resultant vector
-    BL_Speed = Math.hypot(BL_X, BL_Y);
+    BL_Power = Math.hypot(BL_X, BL_Y);
     // arctan to find angle of resulatant vector, then correct for quadrant
     BL_Target = (Math.toDegrees(Math.atan2(BL_Y, BL_X)) + (LY < 0 ? 360 : 0)) % 360;
 
@@ -338,7 +362,7 @@ public class Swerve extends SubsystemBase {
     BR_Y = LY - (ROTATION_Y * RX);
 
     // pythagorean theorum to find magnitude of resultant vector
-    BR_Speed = Math.hypot(BR_X, BR_Y);
+    BR_Power = Math.hypot(BR_X, BR_Y);
     // arctan to find angle of resulatant vector, then correct for quadrant
     BR_Target = (Math.toDegrees(Math.atan2(BR_Y, BR_X)) + (LY < 0 ? 360 : 0)) % 360;
 
@@ -346,12 +370,12 @@ public class Swerve extends SubsystemBase {
     // the max so that the
     // fastest wheel goes full speed and the others preserve their ratios of speed
     // to acheive smooth movement
-    _speedRegulator = Math.max(Math.max(FL_Speed, FR_Speed), Math.max(BL_Speed, BR_Speed));
+    _speedRegulator = Math.max(Math.max(FL_Power, FR_Power), Math.max(BL_Power, BR_Power));
     if (_speedRegulator > 1.0) {
-      FL_Speed /= _speedRegulator;
-      FR_Speed /= _speedRegulator;
-      BL_Speed /= _speedRegulator;
-      BR_Speed /= _speedRegulator;
+      FL_Power /= _speedRegulator;
+      FR_Power /= _speedRegulator;
+      BL_Power /= _speedRegulator;
+      BR_Power /= _speedRegulator;
     }
 
     // read yaw from NavX and apply offset
@@ -373,33 +397,33 @@ public class Swerve extends SubsystemBase {
     }
 
     // find the shortest path to an equivalent position to prevent unneccesary full rotations
-    _Path_1 = Math.abs(FL_Target - FL_Actual);
-    _Path_2 = Math.abs((FL_Target + 360) - FL_Actual);
-    _Path_3 = Math.abs((FL_Target - 360) - FL_Actual);
+    _Path_1 = Math.abs(FL_Target - FL_Actual_Position);
+    _Path_2 = Math.abs((FL_Target + 360) - FL_Actual_Position);
+    _Path_3 = Math.abs((FL_Target - 360) - FL_Actual_Position);
     if (Math.min(Math.min(_Path_1, _Path_2), _Path_3) == _Path_2)
       FL_Target += 360;
     if (Math.min(Math.min(_Path_1, _Path_2), _Path_3) == _Path_3)
       FL_Target -= 360;
 
-    _Path_1 = Math.abs(FR_Target - FR_Actual);
-    _Path_2 = Math.abs((FR_Target + 360) - FR_Actual);
-    _Path_3 = Math.abs((FR_Target - 360) - FR_Actual);
+    _Path_1 = Math.abs(FR_Target - FR_Actual_Position);
+    _Path_2 = Math.abs((FR_Target + 360) - FR_Actual_Position);
+    _Path_3 = Math.abs((FR_Target - 360) - FR_Actual_Position);
     if (Math.min(Math.min(_Path_1, _Path_2), _Path_3) == _Path_2)
       FR_Target += 360;
     if (Math.min(Math.min(_Path_1, _Path_2), _Path_3) == _Path_3)
       FR_Target -= 360;
 
-    _Path_1 = Math.abs(BL_Target - BL_Actual);
-    _Path_2 = Math.abs((BL_Target + 360) - BL_Actual);
-    _Path_3 = Math.abs((BL_Target - 360) - BL_Actual);
+    _Path_1 = Math.abs(BL_Target - BL_Actual_Position);
+    _Path_2 = Math.abs((BL_Target + 360) - BL_Actual_Position);
+    _Path_3 = Math.abs((BL_Target - 360) - BL_Actual_Position);
     if (Math.min(Math.min(_Path_1, _Path_2), _Path_3) == _Path_2)
       BL_Target += 360;
     if (Math.min(Math.min(_Path_1, _Path_2), _Path_3) == _Path_3)
       BL_Target -= 360;
 
-    _Path_1 = Math.abs(BR_Target - BR_Actual);
-    _Path_2 = Math.abs((BR_Target + 360) - BR_Actual);
-    _Path_3 = Math.abs((BR_Target - 360) - BR_Actual);
+    _Path_1 = Math.abs(BR_Target - BR_Actual_Position);
+    _Path_2 = Math.abs((BR_Target + 360) - BR_Actual_Position);
+    _Path_3 = Math.abs((BR_Target - 360) - BR_Actual_Position);
     if (Math.min(Math.min(_Path_1, _Path_2), _Path_3) == _Path_2)
       BR_Target += 360;
     if (Math.min(Math.min(_Path_1, _Path_2), _Path_3) == _Path_3)
@@ -407,16 +431,16 @@ public class Swerve extends SubsystemBase {
 
     // correct the target positions so that they are close to the current position
     // then convert to sensor units and pass target positions to motor controllers
-    FL_Azimuth.set(ControlMode.Position, ((FL_Target + (FL_Actual - (FL_Actual % 360) / 360) * 4096)));
-    FR_Azimuth.set(ControlMode.Position, ((FR_Target + (FR_Actual - (FR_Actual % 360) / 360) * 4096)));
-    BL_Azimuth.set(ControlMode.Position, ((BL_Target + (BL_Actual - (BL_Actual % 360) / 360) * 4096)));
-    BR_Azimuth.set(ControlMode.Position, ((BR_Target + (BR_Actual - (BR_Actual % 360) / 360) * 4096)));
+    FL_Azimuth.set(ControlMode.Position, ((FL_Target + (FL_Actual_Position - (FL_Actual_Position % 360) / 360) * 4096)));
+    FR_Azimuth.set(ControlMode.Position, ((FR_Target + (FR_Actual_Position - (FR_Actual_Position % 360) / 360) * 4096)));
+    BL_Azimuth.set(ControlMode.Position, ((BL_Target + (BL_Actual_Position - (BL_Actual_Position % 360) / 360) * 4096)));
+    BR_Azimuth.set(ControlMode.Position, ((BR_Target + (BR_Actual_Position - (BR_Actual_Position % 360) / 360) * 4096)));
 
     // pass wheel speeds to motor controllers
-    FL_Drive.set(ControlMode.PercentOutput, FL_Speed);
-    FR_Drive.set(ControlMode.PercentOutput, FR_Speed);
-    BL_Drive.set(ControlMode.PercentOutput, BL_Speed);
-    BR_Drive.set(ControlMode.PercentOutput, BR_Speed);
+    FL_Drive.set(ControlMode.PercentOutput, FL_Power);
+    FR_Drive.set(ControlMode.PercentOutput, FR_Power);
+    BL_Drive.set(ControlMode.PercentOutput, BL_Power);
+    BR_Drive.set(ControlMode.PercentOutput, BR_Power);
   }
 
   /** Sets the gyroscope's current heading to 0 */
