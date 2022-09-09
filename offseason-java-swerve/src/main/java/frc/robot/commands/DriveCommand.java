@@ -45,10 +45,6 @@ public class DriveCommand extends CommandBase {
     m_RX = m_driver.getRawAxis(4); // right x axis (rotation)
     
     m_swerve.drive(m_LX, m_LY, m_RX);
-
-    if (m_driver.getRawButton(2)) m_swerve.zeroGyro();
-
-    
   }
 
   // Called once the command ends or is interrupted.
