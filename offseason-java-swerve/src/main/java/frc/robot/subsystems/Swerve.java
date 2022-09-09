@@ -245,7 +245,7 @@ public class Swerve extends SubsystemBase {
   @Override
   public void simulationPeriodic() {
     // This method will be called once per scheduler run during simulation
-    
+
     // dashboard data
     Telemetry.setValue("drivetrain/FL/Azimuth_Target", FL_Target);
     Telemetry.setValue("drivetrain/FR/Azimuth_Target", FR_Target);
@@ -399,12 +399,26 @@ public class Swerve extends SubsystemBase {
     BR_Drive.set(ControlMode.PercentOutput, BR_Speed);
   }
 
+  /** Sets the gyroscope's current heading to 0 */
   public void zeroGyro() {
     gyro.zeroYaw();
   }
 
-  public boolean toggleFieldOrient() {
+  /** toggles field/robot orientation
+   * @return new isRobotOriented value
+   */
+  public boolean toggleRobotOrient() {
     isRobotOriented = !isRobotOriented;
     return isRobotOriented;
+  }
+
+  /** @return true if robot oriented, false if field oriented */
+  public boolean getIsRobotOriented() {
+    return isRobotOriented;
+  }
+
+  /** Sets the robot's orientation to robot (true) or field (false) */
+  public void setRobotOriented(boolean _isRobotOriented) {
+    isRobotOriented = _isRobotOriented;
   }
 }

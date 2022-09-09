@@ -26,7 +26,7 @@ public class ToggleFieldOrientedDriveCommand extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    m_swerve.toggleFieldOrient();
+    m_swerve.toggleRobotOrient();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
