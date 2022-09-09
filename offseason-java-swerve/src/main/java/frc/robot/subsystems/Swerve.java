@@ -14,7 +14,12 @@ import com.ctre.phoenix.sensors.SensorInitializationStrategy;
 import com.kauailabs.navx.frc.AHRS;
 import frc.lib.Telemetry;
 
+/** 
+ * The self-contained swerve/drivetrain subsystem
+ * @author Rylan Moseley
+ */
 public class Swerve extends SubsystemBase {
+  // TODO: acquire pigeon and replace NavX (AHRS) with pigeon API
   /** Robot-mounted gyroscope (NavX or Pigeon) for field-centric driving and field positioning */
   private AHRS gyro;
 
@@ -351,8 +356,7 @@ public class Swerve extends SubsystemBase {
       BR_Target = (Math.toDegrees(Math.atan2(-ROTATION_Y, +ROTATION_X))) % 360;
     }
 
-    // find the shortest path to an equivalent position to prevent unneccesary full
-    // rotations
+    // find the shortest path to an equivalent position to prevent unneccesary full rotations
     _Path_1 = Math.abs(FL_Target - FL_Actual);
     _Path_2 = Math.abs((FL_Target + 360) - FL_Actual);
     _Path_3 = Math.abs((FL_Target - 360) - FL_Actual);
