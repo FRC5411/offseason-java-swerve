@@ -91,6 +91,9 @@ public class Swerve extends SubsystemBase {
   private static final double DRIVE_NEUTRAL_BAND = 0.001; // TODO: tune
   private static final double AZIMUTH_NEUTRAL_BAND = 0.001; // TODO: tune
 
+  private static final double DRIVE_RAMP_RATE = 0; // TODO: tune
+
+
   // encoder offsets (degrees)
   // TODO: measure
   private static final int FL_ECODER_OFFSET = 0;
@@ -104,25 +107,30 @@ public class Swerve extends SubsystemBase {
     gyro = NavX;
 
     // config drive motors
+    // todo config current limits to prevent overheating
     FL_Drive.configFactoryDefault();
     FL_Drive.setInverted(TalonFXInvertType.CounterClockwise);
     FL_Drive.setNeutralMode(NeutralMode.Brake);
     FL_Drive.configNeutralDeadband(DRIVE_NEUTRAL_BAND);
+    FL_Drive.configOpenloopRamp(DRIVE_RAMP_RATE);
 
     FR_Drive.configFactoryDefault();
     FR_Drive.setInverted(TalonFXInvertType.CounterClockwise);
     FR_Drive.setNeutralMode(NeutralMode.Brake);
     FR_Drive.configNeutralDeadband(DRIVE_NEUTRAL_BAND);
+    FR_Drive.configOpenloopRamp(DRIVE_RAMP_RATE);
 
     BL_Drive.configFactoryDefault();
     BL_Drive.setInverted(TalonFXInvertType.CounterClockwise);
     BL_Drive.setNeutralMode(NeutralMode.Brake);
     BL_Drive.configNeutralDeadband(DRIVE_NEUTRAL_BAND);
+    BL_Drive.configOpenloopRamp(DRIVE_RAMP_RATE);
 
     BR_Drive.configFactoryDefault();
     BR_Drive.setInverted(TalonFXInvertType.CounterClockwise);
     BR_Drive.setNeutralMode(NeutralMode.Brake);
     BR_Drive.configNeutralDeadband(DRIVE_NEUTRAL_BAND);
+    BR_Drive.configOpenloopRamp(DRIVE_RAMP_RATE);
 
     // config CANcoders
     FL_Position.configFactoryDefault();
