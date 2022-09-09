@@ -15,6 +15,7 @@ import com.kauailabs.navx.frc.AHRS;
 import frc.lib.Telemetry;
 
 public class Swerve extends SubsystemBase {
+  /** Robot-mounted gyroscope (NavX or Pigeon) for field-centric driving and field positioning */
   private AHRS gyro;
 
   // swerve module CANCoders
@@ -88,21 +89,21 @@ public class Swerve extends SubsystemBase {
   private static final double ROTATION_Y = Math.sin(Math.atan2(ROBOT_LENGTH, ROBOT_WIDTH));
   private static final double ROTATION_X = Math.cos(Math.atan2(ROBOT_LENGTH, ROBOT_WIDTH));
 
-  private static final double DRIVE_NEUTRAL_BAND = 0.001; // TODO: tune
-  private static final double AZIMUTH_NEUTRAL_BAND = 0.001; // TODO: tune
+  private static final double DRIVE_NEUTRAL_BAND = 0.001; // TODO: tune drive motor neutral band
+  private static final double AZIMUTH_NEUTRAL_BAND = 0.001; // TODO: tune azimuth motor neutral band
 
-  private static final double DRIVE_RAMP_RATE = 0; // TODO: tune
+  private static final double DRIVE_RAMP_RATE = 0; // TODO: tune drive motor ramp rate
 
 
   // encoder offsets (degrees)
-  // TODO: measure
+  // TODO: measure encoder offsets
   private static final int FL_ECODER_OFFSET = 0;
   private static final int FR_ECODER_OFFSET = 0;
   private static final int BL_ECODER_OFFSET = 0;
   private static final int BR_ECODER_OFFSET = 0;
 
   // pid values
-  // TODO get values from other code
+  // TODO get PID values from other code
   private static final double AZIMUTH_kP = 0;
   private static final double AZIMUTH_kI = 0;
   private static final double AZIMUTH_kD = 0;
@@ -244,6 +245,30 @@ public class Swerve extends SubsystemBase {
   @Override
   public void simulationPeriodic() {
     // This method will be called once per scheduler run during simulation
+    
+    // dashboard data
+    Telemetry.setValue("drivetrain/FL/Azimuth_Target", FL_Target);
+    Telemetry.setValue("drivetrain/FR/Azimuth_Target", FR_Target);
+    Telemetry.setValue("drivetrain/BL/Azimuth_Target", BL_Target);
+    Telemetry.setValue("drivetrain/BR/Azimuth_Target", BR_Target);
+    Telemetry.setValue("drivetrain/FL/Drive_Speed", FL_Speed);
+    Telemetry.setValue("drivetrain/FR/Drive_Speed", FR_Speed);
+    Telemetry.setValue("drivetrain/BL/Drive_Speed", BL_Speed);
+    Telemetry.setValue("drivetrain/BR/Drive_Speed", BR_Speed);
+    Telemetry.setValue("drivetrain/FL/Azimuth_Actual", FL_Actual);
+    Telemetry.setValue("drivetrain/FR/Azimuth_Actual", FR_Actual);
+    Telemetry.setValue("drivetrain/BL/Azimuth_Actual", BL_Actual);
+    Telemetry.setValue("drivetrain/BR/Azimuth_Actual", BR_Actual);
+    Telemetry.setValue("drivetrain/FL/Drive_Temp", FL_Drive.getTemperature());
+    Telemetry.setValue("drivetrain/FR/Drive_Temp", FR_Drive.getTemperature());
+    Telemetry.setValue("drivetrain/BL/Drive_Temp", BL_Drive.getTemperature());
+    Telemetry.setValue("drivetrain/BR/Drive_Temp", BR_Drive.getTemperature());
+    Telemetry.setValue("drivetrain/FL/Azimuth_Temp", FL_Azimuth.getTemperature());
+    Telemetry.setValue("drivetrain/FR/Azimuth_Temp", FR_Azimuth.getTemperature());
+    Telemetry.setValue("drivetrain/BL/Azimuth_Temp", BL_Azimuth.getTemperature());
+    Telemetry.setValue("drivetrain/BR/Azimuth_Temp", BR_Azimuth.getTemperature());
+    Telemetry.setValue("drivetrain/isRobotOriented", isRobotOriented);
+    Telemetry.setValue("drivetrain/yaw", gyro.getYaw());
   }
 
   public void drive(double LX, double LY, double RX) {
@@ -318,7 +343,7 @@ public class Swerve extends SubsystemBase {
     BR_Target += isRobotOriented ? 0.0 : robotYaw;
 
     // if joystick is idle, lock wheels to X formation to avoid pushing
-    // TODO check if effective, if necesary; button toggle instead of default?
+    // TODO check if X-locking effective, if necesary; button toggle instead of default?
     if (LX == 0 && LY == 0 && RX == 0) {
       FL_Target = (Math.toDegrees(Math.atan2(+ROTATION_Y, -ROTATION_X))) % 360;
       FR_Target = (Math.toDegrees(Math.atan2(+ROTATION_Y, +ROTATION_X))) % 360;
