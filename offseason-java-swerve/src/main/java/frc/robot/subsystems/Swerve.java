@@ -10,6 +10,7 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.TalonFXInvertType;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.sensors.CANCoder;
+import com.ctre.phoenix.sensors.SensorInitializationStrategy;
 import com.kauailabs.navx.frc.AHRS;
 import frc.lib.Telemetry;
 
@@ -90,6 +91,13 @@ public class Swerve extends SubsystemBase {
   private static final double DRIVE_NEUTRAL_BAND = 0.001; // TODO: tune
   private static final double AZIMUTH_NEUTRAL_BAND = 0.001; // TODO: tune
 
+  // encoder offsets (degrees)
+  // TODO: measure
+  private static final int FL_ECODER_OFFSET = 0;
+  private static final int FR_ECODER_OFFSET = 0;
+  private static final int BL_ECODER_OFFSET = 0;
+  private static final int BR_ECODER_OFFSET = 0;
+
   /** Creates a new ExampleSubsystem. */
   public Swerve(AHRS NavX) {
 
@@ -116,31 +124,55 @@ public class Swerve extends SubsystemBase {
     BR_Drive.setNeutralMode(NeutralMode.Brake);
     BR_Drive.configNeutralDeadband(DRIVE_NEUTRAL_BAND);
 
+    // config CANcoders
+    FL_Position.configFactoryDefault();
+    FL_Position.configMagnetOffset(FL_ECODER_OFFSET);
+    FL_Position.configSensorInitializationStrategy(SensorInitializationStrategy.BootToAbsolutePosition);
+    FL_Position.setPositionToAbsolute();
+
+    FR_Position.configFactoryDefault();
+    FR_Position.configMagnetOffset(FR_ECODER_OFFSET);
+    FR_Position.configSensorInitializationStrategy(SensorInitializationStrategy.BootToAbsolutePosition);
+    FR_Position.setPositionToAbsolute();
+
+    BL_Position.configFactoryDefault();
+    BL_Position.configMagnetOffset(BL_ECODER_OFFSET);
+    BL_Position.configSensorInitializationStrategy(SensorInitializationStrategy.BootToAbsolutePosition);
+    BL_Position.setPositionToAbsolute();
+
+    BR_Position.configFactoryDefault();
+    BR_Position.configMagnetOffset(BR_ECODER_OFFSET);
+    BR_Position.configSensorInitializationStrategy(SensorInitializationStrategy.BootToAbsolutePosition);
+    BR_Position.setPositionToAbsolute();
+
     // config azimuth (steering) motors
-    // TODO zeroing with cancoders
     FL_Azimuth.configFactoryDefault();
     FL_Azimuth.setInverted(TalonFXInvertType.CounterClockwise);
     FL_Azimuth.configNeutralDeadband(AZIMUTH_NEUTRAL_BAND);
     FL_Azimuth.setNeutralMode(NeutralMode.Brake);
     FL_Azimuth.configRemoteFeedbackFilter(FL_Position, 0);
+    FL_Azimuth.setSelectedSensorPosition(FL_Position.getAbsolutePosition());
 
     FR_Azimuth.configFactoryDefault();
     FR_Azimuth.setInverted(TalonFXInvertType.CounterClockwise);
     FR_Azimuth.configNeutralDeadband(AZIMUTH_NEUTRAL_BAND);
     FR_Azimuth.setNeutralMode(NeutralMode.Brake);
     FR_Azimuth.configRemoteFeedbackFilter(FR_Position, 0);
+    FR_Azimuth.setSelectedSensorPosition(FR_Position.getAbsolutePosition());
 
     BL_Azimuth.configFactoryDefault();
     BL_Azimuth.setInverted(TalonFXInvertType.CounterClockwise);
     BL_Azimuth.configNeutralDeadband(AZIMUTH_NEUTRAL_BAND);
     BL_Azimuth.setNeutralMode(NeutralMode.Brake);
     BL_Azimuth.configRemoteFeedbackFilter(BL_Position, 0);
+    BL_Azimuth.setSelectedSensorPosition(BL_Position.getAbsolutePosition());
 
     BR_Azimuth.configFactoryDefault();
     BR_Azimuth.setInverted(TalonFXInvertType.CounterClockwise);
     BR_Azimuth.configNeutralDeadband(AZIMUTH_NEUTRAL_BAND);
     BR_Azimuth.setNeutralMode(NeutralMode.Brake);
     BR_Azimuth.configRemoteFeedbackFilter(BR_Position, 0);
+    BR_Azimuth.setSelectedSensorPosition(BR_Position.getAbsolutePosition());
   }
 
   @Override
@@ -244,7 +276,7 @@ public class Swerve extends SubsystemBase {
       BL_Speed /= _speedRegulator;
       BR_Speed /= _speedRegulator;
     }
-      
+
     // read yaw from NavX and apply offset
     robotYaw = gyro.getYaw() + GYRO_OFFSET;
 
@@ -311,11 +343,11 @@ public class Swerve extends SubsystemBase {
     BR_Drive.set(ControlMode.PercentOutput, BR_Speed);
   }
 
-  public void zeroGyro () {
+  public void zeroGyro() {
     gyro.zeroYaw();
   }
 
-  public boolean toggleFieldOrient () {
+  public boolean toggleFieldOrient() {
     isRobotOriented = !isRobotOriented;
     return isRobotOriented;
   }
