@@ -5,7 +5,6 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj.Joystick;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.TalonFXInvertType;
@@ -15,22 +14,7 @@ import com.kauailabs.navx.frc.AHRS;
 import frc.lib.Telemetry;
 
 public class Swerve extends SubsystemBase {
-  private Joystick driver;
   private AHRS gyro;
-
-  // controller axis values
-  private double LX = 0.0;
-  private double LY = 0.0;
-  private double RX = 0.0;
-
-  // field position
-  private Double[] position_x = new Double[4];
-  private Double[] position_y = new Double[4];
-
-  private double FL_Distance = 0;
-  private double FR_Distance = 0;
-  private double BL_Distance = 0;
-  private double BR_Distance = 0;
 
   // swerve module CANCoders
   private final CANCoder FL_Position = new CANCoder(5);
@@ -92,8 +76,7 @@ public class Swerve extends SubsystemBase {
   private final double gyroOffset = 0.0;
 
   // robot oriented / field oriented swerve drive toggle
-  private boolean isRobotOriented  = true;
-  private boolean orientationState = false;
+  private boolean isRobotOriented = true;
 
   // length = front to back (inches)
   public static final double ROBOT_LENGTH = 31.0;
@@ -105,9 +88,8 @@ public class Swerve extends SubsystemBase {
   private final double ROTATION_X = Math.cos(Math.atan2(ROBOT_LENGTH, ROBOT_WIDTH));
 
   /** Creates a new ExampleSubsystem. */
-  public Swerve ( Joystick usb0, AHRS NavX ) {
+  public Swerve(AHRS NavX) {
 
-    driver = usb0;
     gyro = NavX;
 
     // config drive motors
@@ -163,10 +145,10 @@ public class Swerve extends SubsystemBase {
     // This method will be called once per scheduler run
 
     // 'actual' read sensor positions of each module
-    FL_Actual = (FL_Azimuth.getSelectedSensorPosition()/4096)*360;
-    FR_Actual = (FR_Azimuth.getSelectedSensorPosition()/4096)*360;
-    BL_Actual = (BL_Azimuth.getSelectedSensorPosition()/4096)*360;
-    BR_Actual = (BR_Azimuth.getSelectedSensorPosition()/4096)*360;
+    FL_Actual = (FL_Azimuth.getSelectedSensorPosition() / 4096) * 360;
+    FR_Actual = (FR_Azimuth.getSelectedSensorPosition() / 4096) * 360;
+    BL_Actual = (BL_Azimuth.getSelectedSensorPosition() / 4096) * 360;
+    BR_Actual = (BR_Azimuth.getSelectedSensorPosition() / 4096) * 360;
 
     // dashboard data
     Telemetry.setValue("drivetrain/FL/Azimuth_Target", FL_Target);
@@ -181,10 +163,6 @@ public class Swerve extends SubsystemBase {
     Telemetry.setValue("drivetrain/FR/Azimuth_Actual", FR_Actual);
     Telemetry.setValue("drivetrain/BL/Azimuth_Actual", BL_Actual);
     Telemetry.setValue("drivetrain/BR/Azimuth_Actual", BR_Actual);
-    Telemetry.setValue("drivetrain/FL/Drive_Distance", FL_Distance);
-    Telemetry.setValue("drivetrain/FR/Drive_Distance", FR_Distance);
-    Telemetry.setValue("drivetrain/BL/Drive_Distance", BL_Distance);
-    Telemetry.setValue("drivetrain/BR/Drive_Distance", BR_Distance);
     Telemetry.setValue("drivetrain/FL/Drive_Temp", FL_Drive.getTemperature());
     Telemetry.setValue("drivetrain/FR/Drive_Temp", FR_Drive.getTemperature());
     Telemetry.setValue("drivetrain/BL/Drive_Temp", BL_Drive.getTemperature());
@@ -202,70 +180,68 @@ public class Swerve extends SubsystemBase {
     // This method will be called once per scheduler run during simulation
   }
 
-  public void drive () {
-    // fetch joystick axis values
-    LX = driver.getRawAxis(0); // left x axis (strafe)
-    LY = -driver.getRawAxis(1); // left y axis (strafe)
-    RX = driver.getRawAxis(4); // right x axis (rotation)
+  public void drive(double LX, double LY, double RX) {
 
     // apply deadzone of 0.1 to each axis
-    if ( Math.abs(LX) < 0.1 ) LX = 0.0;
-    if ( Math.abs(LY) < 0.1 ) LY = 0.0;
-    if ( Math.abs(RX) < 0.1 ) RX = 0.0;
+    if (Math.abs(LX) < 0.1)
+      LX = 0.0;
+    if (Math.abs(LY) < 0.1)
+      LY = 0.0;
+    if (Math.abs(RX) < 0.1)
+      RX = 0.0;
 
-    // vector addition of strafe component (LX & LY) and rotation component (ROTATION_X * RX)
+    // vector addition of strafe component (LX & LY) and rotation component
+    // (ROTATION_X * RX)
     FL_X = LX + (ROTATION_X * RX);
     FL_Y = LY + (ROTATION_Y * RX);
 
     // pythagorean theorum to find magnitude of resultant vector
-    FL_Speed  = Math.sqrt( Math.pow(FL_X, 2) + Math.pow(FL_Y, 2) );
+    FL_Speed = Math.sqrt(Math.pow(FL_X, 2) + Math.pow(FL_Y, 2));
     // arctan to find angle of resulatant vector, then correct for quadrant
     FL_Target = (Math.toDegrees(Math.atan2(FL_Y, FL_X)) + (LY < 0 ? 360 : 0)) % 360;
 
-    // vector addition of strafe component (LX & LY) and rotation component (ROTATION_X * RX)
+    // vector addition of strafe component (LX & LY) and rotation component
+    // (ROTATION_X * RX)
     FR_X = LX + (ROTATION_X * RX);
     FR_Y = LY - (ROTATION_Y * RX);
 
     // pythagorean theorum to find magnitude of resultant vector
-    FR_Speed  = Math.sqrt( Math.pow(FR_X, 2) + Math.pow(FR_Y, 2) );
+    FR_Speed = Math.sqrt(Math.pow(FR_X, 2) + Math.pow(FR_Y, 2));
     // arctan to find angle of resulatant vector, then correct for quadrant
     FR_Target = (Math.toDegrees(Math.atan2(FR_Y, FR_X)) + (LY < 0 ? 360 : 0)) % 360;
 
-    // vector addition of strafe component (LX & LY) and rotation component (ROTATION_X * RX)
+    // vector addition of strafe component (LX & LY) and rotation component
+    // (ROTATION_X * RX)
     BL_X = LX - (ROTATION_X * RX);
     BL_Y = LY + (ROTATION_Y * RX);
 
     // pythagorean theorum to find magnitude of resultant vector
-    BL_Speed  = Math.sqrt( Math.pow(BL_X, 2) + Math.pow(BL_Y, 2) );
+    BL_Speed = Math.sqrt(Math.pow(BL_X, 2) + Math.pow(BL_Y, 2));
     // arctan to find angle of resulatant vector, then correct for quadrant
     BL_Target = (Math.toDegrees(Math.atan2(BL_Y, BL_X)) + (LY < 0 ? 360 : 0)) % 360;
 
-    // vector addition of strafe component (LX & LY) and rotation component (ROTATION_X * RX)
+    // vector addition of strafe component (LX & LY) and rotation component
+    // (ROTATION_X * RX)
     BR_X = LX - (ROTATION_X * RX);
     BR_Y = LY - (ROTATION_Y * RX);
 
     // pythagorean theorum to find magnitude of resultant vector
-    BR_Speed  = Math.sqrt( Math.pow(BR_X, 2) + Math.pow(BR_Y, 2) );
+    BR_Speed = Math.sqrt(Math.pow(BR_X, 2) + Math.pow(BR_Y, 2));
     // arctan to find angle of resulatant vector, then correct for quadrant
     BR_Target = (Math.toDegrees(Math.atan2(BR_Y, BR_X)) + (LY < 0 ? 360 : 0)) % 360;
 
-    // if one or more wheels has a target speed of > 100%, put all wheel speeds over the max so that the
-    // fastest wheel goes full speed and the others preserve their ratios of speed to acheive smooth movement
-    speedRegulator = Math.max( Math.max( FL_Speed, FR_Speed ), Math.max(BL_Speed, BR_Speed) );
-    if ( speedRegulator > 1.0 ) {
+    // if one or more wheels has a target speed of > 100%, put all wheel speeds over
+    // the max so that the
+    // fastest wheel goes full speed and the others preserve their ratios of speed
+    // to acheive smooth movement
+    speedRegulator = Math.max(Math.max(FL_Speed, FR_Speed), Math.max(BL_Speed, BR_Speed));
+    if (speedRegulator > 1.0) {
       FL_Speed /= speedRegulator;
       FR_Speed /= speedRegulator;
       BL_Speed /= speedRegulator;
       BR_Speed /= speedRegulator;
     }
-
-    // robot orient / field orient toggle on A button pressed
-    if ( !orientationState && driver.getRawButton(1) ) isRobotOriented = !isRobotOriented;
-    orientationState = driver.getRawButton(1);
-
-    // zero NavX on B button pressed
-    if ( driver.getRawButton(2) ) gyro.zeroYaw();
-
+      
     // read yaw from NavX and apply offset
     robotYaw = gyro.getYaw() + gyroOffset;
 
@@ -277,49 +253,67 @@ public class Swerve extends SubsystemBase {
 
     // if joystick is idle, lock wheels to X formation to avoid pushing
     // TODO check if effective, if necesary; button toggle instead of default?
-    if ( LX == 0 && LY == 0 && RX == 0 ) {
+    if (LX == 0 && LY == 0 && RX == 0) {
       FL_Target = (Math.toDegrees(Math.atan2(+ROTATION_Y, -ROTATION_X))) % 360;
       FR_Target = (Math.toDegrees(Math.atan2(+ROTATION_Y, +ROTATION_X))) % 360;
       BL_Target = (Math.toDegrees(Math.atan2(-ROTATION_Y, -ROTATION_X))) % 360;
       BR_Target = (Math.toDegrees(Math.atan2(-ROTATION_Y, +ROTATION_X))) % 360;
     }
 
-    // find the shortest path to an equivalent position to prevent unneccesary full rotations
+    // find the shortest path to an equivalent position to prevent unneccesary full
+    // rotations
     Path_1 = Math.abs(FL_Target - FL_Actual);
     Path_2 = Math.abs((FL_Target + 360) - FL_Actual);
     Path_3 = Math.abs((FL_Target - 360) - FL_Actual);
-    if ( Math.min(Math.min( Path_1, Path_2 ), Path_3) == Path_2 ) FL_Target += 360;
-    if ( Math.min(Math.min( Path_1, Path_2 ), Path_3) == Path_3 ) FL_Target -= 360;
+    if (Math.min(Math.min(Path_1, Path_2), Path_3) == Path_2)
+      FL_Target += 360;
+    if (Math.min(Math.min(Path_1, Path_2), Path_3) == Path_3)
+      FL_Target -= 360;
 
     Path_1 = Math.abs(FR_Target - FR_Actual);
     Path_2 = Math.abs((FR_Target + 360) - FR_Actual);
     Path_3 = Math.abs((FR_Target - 360) - FR_Actual);
-    if ( Math.min(Math.min( Path_1, Path_2 ), Path_3) == Path_2 ) FR_Target += 360;
-    if ( Math.min(Math.min( Path_1, Path_2 ), Path_3) == Path_3 ) FR_Target -= 360;
+    if (Math.min(Math.min(Path_1, Path_2), Path_3) == Path_2)
+      FR_Target += 360;
+    if (Math.min(Math.min(Path_1, Path_2), Path_3) == Path_3)
+      FR_Target -= 360;
 
     Path_1 = Math.abs(BL_Target - BL_Actual);
     Path_2 = Math.abs((BL_Target + 360) - BL_Actual);
-    Path_3 = Math.abs((BL_Target - 360) -BL_Actual);
-    if ( Math.min(Math.min( Path_1, Path_2 ), Path_3) == Path_2 ) BL_Target += 360;
-    if ( Math.min(Math.min( Path_1, Path_2 ), Path_3) == Path_3 ) BL_Target -= 360;
+    Path_3 = Math.abs((BL_Target - 360) - BL_Actual);
+    if (Math.min(Math.min(Path_1, Path_2), Path_3) == Path_2)
+      BL_Target += 360;
+    if (Math.min(Math.min(Path_1, Path_2), Path_3) == Path_3)
+      BL_Target -= 360;
 
     Path_1 = Math.abs(BR_Target - BR_Actual);
     Path_2 = Math.abs((BR_Target + 360) - BR_Actual);
     Path_3 = Math.abs((BR_Target - 360) - BR_Actual);
-    if ( Math.min(Math.min( Path_1, Path_2 ), Path_3) == Path_2 ) BR_Target += 360;
-    if ( Math.min(Math.min( Path_1, Path_2 ), Path_3) == Path_3 ) BR_Target -= 360;
+    if (Math.min(Math.min(Path_1, Path_2), Path_3) == Path_2)
+      BR_Target += 360;
+    if (Math.min(Math.min(Path_1, Path_2), Path_3) == Path_3)
+      BR_Target -= 360;
 
     // correct the target positions so that they are close to the current position
     // then convert to sensor units and pass target positions to motor controllers
-    FL_Azimuth.set(ControlMode.Position, ((FL_Target + (FL_Actual - (FL_Actual % 360)/360)*4096)));
-    FR_Azimuth.set(ControlMode.Position, ((FR_Target + (FR_Actual - (FR_Actual % 360)/360)*4096)));
-    BL_Azimuth.set(ControlMode.Position, ((BL_Target + (BL_Actual - (BL_Actual % 360)/360)*4096)));
-    BR_Azimuth.set(ControlMode.Position, ((BR_Target + (BR_Actual - (BR_Actual % 360)/360)*4096)));
+    FL_Azimuth.set(ControlMode.Position, ((FL_Target + (FL_Actual - (FL_Actual % 360) / 360) * 4096)));
+    FR_Azimuth.set(ControlMode.Position, ((FR_Target + (FR_Actual - (FR_Actual % 360) / 360) * 4096)));
+    BL_Azimuth.set(ControlMode.Position, ((BL_Target + (BL_Actual - (BL_Actual % 360) / 360) * 4096)));
+    BR_Azimuth.set(ControlMode.Position, ((BR_Target + (BR_Actual - (BR_Actual % 360) / 360) * 4096)));
 
     // pass wheel speeds to motor controllers
     FL_Drive.set(ControlMode.PercentOutput, FL_Speed);
     FR_Drive.set(ControlMode.PercentOutput, FR_Speed);
     BL_Drive.set(ControlMode.PercentOutput, BL_Speed);
     BR_Drive.set(ControlMode.PercentOutput, BR_Speed);
+  }
+
+  public void zeroGyro () {
+    gyro.zeroYaw();
+  }
+
+  public boolean toggleFieldOrient () {
+    isRobotOriented = !isRobotOriented;
+    return isRobotOriented;
   }
 }
