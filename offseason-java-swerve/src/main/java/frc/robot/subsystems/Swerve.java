@@ -101,6 +101,13 @@ public class Swerve extends SubsystemBase {
   private static final int BL_ECODER_OFFSET = 0;
   private static final int BR_ECODER_OFFSET = 0;
 
+  // pid values
+  // TODO get values from other code
+  private static final double AZIMUTH_kP = 0;
+  private static final double AZIMUTH_kI = 0;
+  private static final double AZIMUTH_kD = 0;
+  private static final double AZIMUTH_INTEGRAL_ZONE = 0;
+
   /** Creates a new ExampleSubsystem. */
   public Swerve(AHRS NavX) {
 
@@ -160,6 +167,10 @@ public class Swerve extends SubsystemBase {
     FL_Azimuth.setNeutralMode(NeutralMode.Brake);
     FL_Azimuth.configRemoteFeedbackFilter(FL_Position, 0);
     FL_Azimuth.setSelectedSensorPosition(FL_Position.getAbsolutePosition());
+    FL_Azimuth.config_kP(0, AZIMUTH_kP);
+    FL_Azimuth.config_kI(0, AZIMUTH_kI);
+    FL_Azimuth.config_kD(0, AZIMUTH_kD);
+    FL_Azimuth.config_IntegralZone(0, AZIMUTH_INTEGRAL_ZONE);
 
     FR_Azimuth.configFactoryDefault();
     FR_Azimuth.setInverted(TalonFXInvertType.CounterClockwise);
@@ -167,6 +178,10 @@ public class Swerve extends SubsystemBase {
     FR_Azimuth.setNeutralMode(NeutralMode.Brake);
     FR_Azimuth.configRemoteFeedbackFilter(FR_Position, 0);
     FR_Azimuth.setSelectedSensorPosition(FR_Position.getAbsolutePosition());
+    FR_Azimuth.config_kP(0, AZIMUTH_kP);
+    FR_Azimuth.config_kI(0, AZIMUTH_kI);
+    FR_Azimuth.config_kD(0, AZIMUTH_kD);
+    FR_Azimuth.config_IntegralZone(0, AZIMUTH_INTEGRAL_ZONE);
 
     BL_Azimuth.configFactoryDefault();
     BL_Azimuth.setInverted(TalonFXInvertType.CounterClockwise);
@@ -174,6 +189,10 @@ public class Swerve extends SubsystemBase {
     BL_Azimuth.setNeutralMode(NeutralMode.Brake);
     BL_Azimuth.configRemoteFeedbackFilter(BL_Position, 0);
     BL_Azimuth.setSelectedSensorPosition(BL_Position.getAbsolutePosition());
+    BL_Azimuth.config_kP(0, AZIMUTH_kP);
+    BL_Azimuth.config_kI(0, AZIMUTH_kI);
+    BL_Azimuth.config_kD(0, AZIMUTH_kD);
+    BL_Azimuth.config_IntegralZone(0, AZIMUTH_INTEGRAL_ZONE);
 
     BR_Azimuth.configFactoryDefault();
     BR_Azimuth.setInverted(TalonFXInvertType.CounterClockwise);
@@ -181,6 +200,10 @@ public class Swerve extends SubsystemBase {
     BR_Azimuth.setNeutralMode(NeutralMode.Brake);
     BR_Azimuth.configRemoteFeedbackFilter(BR_Position, 0);
     BR_Azimuth.setSelectedSensorPosition(BR_Position.getAbsolutePosition());
+    BR_Azimuth.config_kP(0, AZIMUTH_kP);
+    BR_Azimuth.config_kI(0, AZIMUTH_kI);
+    BR_Azimuth.config_kD(0, AZIMUTH_kD);
+    BR_Azimuth.config_IntegralZone(0, AZIMUTH_INTEGRAL_ZONE);
   }
 
   @Override
