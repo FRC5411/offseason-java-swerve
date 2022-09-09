@@ -63,17 +63,17 @@ public class Swerve extends SubsystemBase {
   private double BR_Actual = 0.0;
 
   // temp variables used to determine the most efficient path for each module
-  private double Path_1 = 0.0;
-  private double Path_2 = 0.0;
-  private double Path_3 = 0.0;
+  private double _Path_1 = 0.0;
+  private double _Path_2 = 0.0;
+  private double _Path_3 = 0.0;
 
   // swerve wheel speed ratio preservation while capping speeds at 100%
-  private double speedRegulator = 1.0;
+  private double _speedRegulator = 1.0;
 
   // the read yaw value from the NavX
   private double robotYaw = 0.0;
   // the rotation offset of the NavX to the robot (degrees)
-  private final double gyroOffset = 0.0;
+  private static final double GYRO_OFFSET = 0.0;
 
   // robot oriented / field oriented swerve drive toggle
   private boolean isRobotOriented = true;
@@ -84,8 +84,11 @@ public class Swerve extends SubsystemBase {
   public static final double ROBOT_WIDTH = 28.0;
 
   // constants for calculating rotation vector
-  private final double ROTATION_Y = Math.sin(Math.atan2(ROBOT_LENGTH, ROBOT_WIDTH));
-  private final double ROTATION_X = Math.cos(Math.atan2(ROBOT_LENGTH, ROBOT_WIDTH));
+  private static final double ROTATION_Y = Math.sin(Math.atan2(ROBOT_LENGTH, ROBOT_WIDTH));
+  private static final double ROTATION_X = Math.cos(Math.atan2(ROBOT_LENGTH, ROBOT_WIDTH));
+
+  private static final double DRIVE_NEUTRAL_BAND = 0.001; // TODO: tune
+  private static final double AZIMUTH_NEUTRAL_BAND = 0.001; // TODO: tune
 
   /** Creates a new ExampleSubsystem. */
   public Swerve(AHRS NavX) {
@@ -96,46 +99,46 @@ public class Swerve extends SubsystemBase {
     FL_Drive.configFactoryDefault();
     FL_Drive.setInverted(TalonFXInvertType.CounterClockwise);
     FL_Drive.setNeutralMode(NeutralMode.Brake);
-    FL_Drive.configNeutralDeadband(0.001); // TODO tune if needed
+    FL_Drive.configNeutralDeadband(DRIVE_NEUTRAL_BAND);
 
     FR_Drive.configFactoryDefault();
     FR_Drive.setInverted(TalonFXInvertType.CounterClockwise);
     FR_Drive.setNeutralMode(NeutralMode.Brake);
-    FR_Drive.configNeutralDeadband(0.001); // TODO tune if needed
+    FR_Drive.configNeutralDeadband(DRIVE_NEUTRAL_BAND);
 
     BL_Drive.configFactoryDefault();
     BL_Drive.setInverted(TalonFXInvertType.CounterClockwise);
     BL_Drive.setNeutralMode(NeutralMode.Brake);
-    BL_Drive.configNeutralDeadband(0.001); // TODO tune if needed
+    BL_Drive.configNeutralDeadband(DRIVE_NEUTRAL_BAND);
 
     BR_Drive.configFactoryDefault();
     BR_Drive.setInverted(TalonFXInvertType.CounterClockwise);
     BR_Drive.setNeutralMode(NeutralMode.Brake);
-    BR_Drive.configNeutralDeadband(0.001); // TODO tune if needed
+    BR_Drive.configNeutralDeadband(DRIVE_NEUTRAL_BAND);
 
     // config azimuth (steering) motors
     // TODO zeroing with cancoders
     FL_Azimuth.configFactoryDefault();
     FL_Azimuth.setInverted(TalonFXInvertType.CounterClockwise);
-    FL_Azimuth.configNeutralDeadband(0.001); // TODO tune if needed
+    FL_Azimuth.configNeutralDeadband(AZIMUTH_NEUTRAL_BAND);
     FL_Azimuth.setNeutralMode(NeutralMode.Brake);
     FL_Azimuth.configRemoteFeedbackFilter(FL_Position, 0);
 
     FR_Azimuth.configFactoryDefault();
     FR_Azimuth.setInverted(TalonFXInvertType.CounterClockwise);
-    FR_Azimuth.configNeutralDeadband(0.001); // TODO tune if needed
+    FR_Azimuth.configNeutralDeadband(AZIMUTH_NEUTRAL_BAND);
     FR_Azimuth.setNeutralMode(NeutralMode.Brake);
     FR_Azimuth.configRemoteFeedbackFilter(FR_Position, 0);
 
     BL_Azimuth.configFactoryDefault();
     BL_Azimuth.setInverted(TalonFXInvertType.CounterClockwise);
-    BL_Azimuth.configNeutralDeadband(0.001); // TODO tune if needed
+    BL_Azimuth.configNeutralDeadband(AZIMUTH_NEUTRAL_BAND);
     BL_Azimuth.setNeutralMode(NeutralMode.Brake);
     BL_Azimuth.configRemoteFeedbackFilter(BL_Position, 0);
 
     BR_Azimuth.configFactoryDefault();
     BR_Azimuth.setInverted(TalonFXInvertType.CounterClockwise);
-    BR_Azimuth.configNeutralDeadband(0.001); // TODO tune if needed
+    BR_Azimuth.configNeutralDeadband(AZIMUTH_NEUTRAL_BAND);
     BR_Azimuth.setNeutralMode(NeutralMode.Brake);
     BR_Azimuth.configRemoteFeedbackFilter(BR_Position, 0);
   }
@@ -196,7 +199,7 @@ public class Swerve extends SubsystemBase {
     FL_Y = LY + (ROTATION_Y * RX);
 
     // pythagorean theorum to find magnitude of resultant vector
-    FL_Speed = Math.sqrt(Math.pow(FL_X, 2) + Math.pow(FL_Y, 2));
+    FL_Speed = Math.hypot(FL_X, FL_Y);
     // arctan to find angle of resulatant vector, then correct for quadrant
     FL_Target = (Math.toDegrees(Math.atan2(FL_Y, FL_X)) + (LY < 0 ? 360 : 0)) % 360;
 
@@ -206,7 +209,7 @@ public class Swerve extends SubsystemBase {
     FR_Y = LY - (ROTATION_Y * RX);
 
     // pythagorean theorum to find magnitude of resultant vector
-    FR_Speed = Math.sqrt(Math.pow(FR_X, 2) + Math.pow(FR_Y, 2));
+    FR_Speed = Math.hypot(FR_X, FR_Y);
     // arctan to find angle of resulatant vector, then correct for quadrant
     FR_Target = (Math.toDegrees(Math.atan2(FR_Y, FR_X)) + (LY < 0 ? 360 : 0)) % 360;
 
@@ -216,7 +219,7 @@ public class Swerve extends SubsystemBase {
     BL_Y = LY + (ROTATION_Y * RX);
 
     // pythagorean theorum to find magnitude of resultant vector
-    BL_Speed = Math.sqrt(Math.pow(BL_X, 2) + Math.pow(BL_Y, 2));
+    BL_Speed = Math.hypot(BL_X, BL_Y);
     // arctan to find angle of resulatant vector, then correct for quadrant
     BL_Target = (Math.toDegrees(Math.atan2(BL_Y, BL_X)) + (LY < 0 ? 360 : 0)) % 360;
 
@@ -226,7 +229,7 @@ public class Swerve extends SubsystemBase {
     BR_Y = LY - (ROTATION_Y * RX);
 
     // pythagorean theorum to find magnitude of resultant vector
-    BR_Speed = Math.sqrt(Math.pow(BR_X, 2) + Math.pow(BR_Y, 2));
+    BR_Speed = Math.hypot(BR_X, BR_Y);
     // arctan to find angle of resulatant vector, then correct for quadrant
     BR_Target = (Math.toDegrees(Math.atan2(BR_Y, BR_X)) + (LY < 0 ? 360 : 0)) % 360;
 
@@ -234,16 +237,16 @@ public class Swerve extends SubsystemBase {
     // the max so that the
     // fastest wheel goes full speed and the others preserve their ratios of speed
     // to acheive smooth movement
-    speedRegulator = Math.max(Math.max(FL_Speed, FR_Speed), Math.max(BL_Speed, BR_Speed));
-    if (speedRegulator > 1.0) {
-      FL_Speed /= speedRegulator;
-      FR_Speed /= speedRegulator;
-      BL_Speed /= speedRegulator;
-      BR_Speed /= speedRegulator;
+    _speedRegulator = Math.max(Math.max(FL_Speed, FR_Speed), Math.max(BL_Speed, BR_Speed));
+    if (_speedRegulator > 1.0) {
+      FL_Speed /= _speedRegulator;
+      FR_Speed /= _speedRegulator;
+      BL_Speed /= _speedRegulator;
+      BR_Speed /= _speedRegulator;
     }
       
     // read yaw from NavX and apply offset
-    robotYaw = gyro.getYaw() + gyroOffset;
+    robotYaw = gyro.getYaw() + GYRO_OFFSET;
 
     // field orientation
     FL_Target += isRobotOriented ? 0.0 : robotYaw;
@@ -262,36 +265,36 @@ public class Swerve extends SubsystemBase {
 
     // find the shortest path to an equivalent position to prevent unneccesary full
     // rotations
-    Path_1 = Math.abs(FL_Target - FL_Actual);
-    Path_2 = Math.abs((FL_Target + 360) - FL_Actual);
-    Path_3 = Math.abs((FL_Target - 360) - FL_Actual);
-    if (Math.min(Math.min(Path_1, Path_2), Path_3) == Path_2)
+    _Path_1 = Math.abs(FL_Target - FL_Actual);
+    _Path_2 = Math.abs((FL_Target + 360) - FL_Actual);
+    _Path_3 = Math.abs((FL_Target - 360) - FL_Actual);
+    if (Math.min(Math.min(_Path_1, _Path_2), _Path_3) == _Path_2)
       FL_Target += 360;
-    if (Math.min(Math.min(Path_1, Path_2), Path_3) == Path_3)
+    if (Math.min(Math.min(_Path_1, _Path_2), _Path_3) == _Path_3)
       FL_Target -= 360;
 
-    Path_1 = Math.abs(FR_Target - FR_Actual);
-    Path_2 = Math.abs((FR_Target + 360) - FR_Actual);
-    Path_3 = Math.abs((FR_Target - 360) - FR_Actual);
-    if (Math.min(Math.min(Path_1, Path_2), Path_3) == Path_2)
+    _Path_1 = Math.abs(FR_Target - FR_Actual);
+    _Path_2 = Math.abs((FR_Target + 360) - FR_Actual);
+    _Path_3 = Math.abs((FR_Target - 360) - FR_Actual);
+    if (Math.min(Math.min(_Path_1, _Path_2), _Path_3) == _Path_2)
       FR_Target += 360;
-    if (Math.min(Math.min(Path_1, Path_2), Path_3) == Path_3)
+    if (Math.min(Math.min(_Path_1, _Path_2), _Path_3) == _Path_3)
       FR_Target -= 360;
 
-    Path_1 = Math.abs(BL_Target - BL_Actual);
-    Path_2 = Math.abs((BL_Target + 360) - BL_Actual);
-    Path_3 = Math.abs((BL_Target - 360) - BL_Actual);
-    if (Math.min(Math.min(Path_1, Path_2), Path_3) == Path_2)
+    _Path_1 = Math.abs(BL_Target - BL_Actual);
+    _Path_2 = Math.abs((BL_Target + 360) - BL_Actual);
+    _Path_3 = Math.abs((BL_Target - 360) - BL_Actual);
+    if (Math.min(Math.min(_Path_1, _Path_2), _Path_3) == _Path_2)
       BL_Target += 360;
-    if (Math.min(Math.min(Path_1, Path_2), Path_3) == Path_3)
+    if (Math.min(Math.min(_Path_1, _Path_2), _Path_3) == _Path_3)
       BL_Target -= 360;
 
-    Path_1 = Math.abs(BR_Target - BR_Actual);
-    Path_2 = Math.abs((BR_Target + 360) - BR_Actual);
-    Path_3 = Math.abs((BR_Target - 360) - BR_Actual);
-    if (Math.min(Math.min(Path_1, Path_2), Path_3) == Path_2)
+    _Path_1 = Math.abs(BR_Target - BR_Actual);
+    _Path_2 = Math.abs((BR_Target + 360) - BR_Actual);
+    _Path_3 = Math.abs((BR_Target - 360) - BR_Actual);
+    if (Math.min(Math.min(_Path_1, _Path_2), _Path_3) == _Path_2)
       BR_Target += 360;
-    if (Math.min(Math.min(Path_1, Path_2), Path_3) == Path_3)
+    if (Math.min(Math.min(_Path_1, _Path_2), _Path_3) == _Path_3)
       BR_Target -= 360;
 
     // correct the target positions so that they are close to the current position
