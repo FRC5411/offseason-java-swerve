@@ -245,6 +245,22 @@ public class Swerve extends SubsystemBase {
     Telemetry.setValue("drivetrain/BR/Azimuth_Temp", BR_Azimuth.getTemperature());
     Telemetry.setValue("drivetrain/isRobotOriented", isRobotOriented);
     Telemetry.setValue("drivetrain/yaw", gyro.getYaw());
+
+    //TODO: Kinematics math + variables
+
+    Telemetry.setValue("drivetrain/kinematics/robot/forward", 0);
+    Telemetry.setValue("drivetrain/kinematics/robot/rightward", 0);
+    Telemetry.setValue("drivetrain/kinematics/rotation", 0);
+    Telemetry.setValue("drivetrain/kinematics/field/ds-away", 0);
+    Telemetry.setValue("drivetrain/kinematics/field/ds-right", 0);
+
+    //TODO: odometry math + variables
+
+    Telemetry.setValue("drivetrain/odometry/robot/forward", 0);
+    Telemetry.setValue("drivetrain/odometry/robot/rightward", 0);
+    Telemetry.setValue("drivetrain/odometry/field/ds-away", 0);
+    Telemetry.setValue("drivetrain/odometry/field/ds-right", 0);
+
   }
 
   @Override
