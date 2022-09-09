@@ -10,6 +10,9 @@ import frc.robot.commands.ExampleCommand;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.Swerve;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj.SPI;
+import com.kauailabs.navx.frc.AHRS;
+import edu.wpi.first.wpilibj.Joystick;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -18,9 +21,15 @@ import edu.wpi.first.wpilibj2.command.Command;
  * subsystems, commands, and button mappings) should be declared here.
  */
 public class RobotContainer {
+  // driver's Xbox controller (DS USB ID 0)
+  private final Joystick driver = new Joystick(0);
+
+  // NavX gyro/accelerometer
+  AHRS NavX = new AHRS(SPI.Port.kMXP); 
+
   // The robot's subsystems and commands are defined here...
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
-  private final Swerve m_swerve = new Swerve();
+  private final Swerve m_swerve = new Swerve(driver, NavX);
 
   private final ExampleCommand m_autoCommand = new ExampleCommand(m_exampleSubsystem);
 
