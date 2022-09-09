@@ -43,6 +43,16 @@ public class DriveCommand extends CommandBase {
     m_LX = m_driver.getRawAxis(0); // left x axis (strafe)
     m_LY = -m_driver.getRawAxis(1); // left y axis (strafe)
     m_RX = m_driver.getRawAxis(4); // right x axis (rotation)
+
+    // deadzones
+    m_LX = ( Math.abs(m_LX) < 0.1 ) ? 0 : m_LX;
+    m_LY = ( Math.abs(m_LY) < 0.1 ) ? 0 : m_LY;
+    m_RX = ( Math.abs(m_RX) < 0.1 ) ? 0 : m_RX;
+
+    // square joysticks
+    m_LX = Math.pow(m_LX, 2) * ( Math.abs(m_LX)/m_LX );
+    m_LY = Math.pow(m_LY, 2) * ( Math.abs(m_LY)/m_LY );
+    m_RX = Math.pow(m_RX, 2) * ( Math.abs(m_RX)/m_RX );
     
     m_swerve.drive(m_LX, m_LY, m_RX);
   }
