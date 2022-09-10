@@ -301,8 +301,8 @@ public class Swerve extends SubsystemBase {
     Telemetry.setValue("drivetrain/kinematics/robot/forward", _forwardTranslation);
     Telemetry.setValue("drivetrain/kinematics/robot/rightward", _sidewaysTranslation);
     Telemetry.setValue("drivetrain/kinematics/clockwise_speed", _rotationTranslation);
-    Telemetry.setValue("drivetrain/kinematics/field/DS_away",  _fieldForwardTranslation);
-    Telemetry.setValue("drivetrain/kinematics/field/DS_right", _fieldSidewaysTranslation );
+    Telemetry.setValue("drivetrain/kinematics/field/DS_away", _fieldForwardTranslation);
+    Telemetry.setValue("drivetrain/kinematics/field/DS_right", _fieldSidewaysTranslation);
 
     _timeStep = System.currentTimeMillis() - _lastRunTime;
 
