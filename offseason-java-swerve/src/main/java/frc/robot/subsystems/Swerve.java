@@ -150,7 +150,7 @@ public class Swerve extends SubsystemBase {
     gyro = NavX;
 
     // config drive motors
-    // todo config current limits to prevent overheating
+    // TODO config current limits to prevent overheating
     FL_Drive.configFactoryDefault();
     FL_Drive.setInverted(TalonFXInvertType.CounterClockwise);
     FL_Drive.setNeutralMode(NeutralMode.Brake);
