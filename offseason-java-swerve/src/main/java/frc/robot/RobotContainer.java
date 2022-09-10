@@ -37,8 +37,8 @@ public class RobotContainer {
 
   private final ExampleCommand m_autoCommand = new ExampleCommand(m_exampleSubsystem);
 
-  JoystickButton aButton = new JoystickButton(driver, 0);
-  JoystickButton bButton = new JoystickButton(driver, 1);
+  JoystickButton aButton = new JoystickButton(driver, 1);
+  JoystickButton bButton = new JoystickButton(driver, 2);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
