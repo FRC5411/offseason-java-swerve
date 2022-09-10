@@ -332,24 +332,24 @@ public class Swerve extends SubsystemBase {
     Telemetry.setValue("drivetrain/FR/Drive_Power", FR_Power);
     Telemetry.setValue("drivetrain/BL/Drive_Power", BL_Power);
     Telemetry.setValue("drivetrain/BR/Drive_Power", BR_Power);
-    Telemetry.setValue("drivetrain/FL/Azimuth_Actual_Position", FL_Actual_Position);
-    Telemetry.setValue("drivetrain/FR/Azimuth_Actual_Position", FR_Actual_Position);
-    Telemetry.setValue("drivetrain/BL/Azimuth_Actual_Position", BL_Actual_Position);
-    Telemetry.setValue("drivetrain/BR/Azimuth_Actual_Position", BR_Actual_Position);
-    Telemetry.setValue("drivetrain/FL/Azimuth_Actual_Speed", FL_Actual_Speed);
-    Telemetry.setValue("drivetrain/FR/Azimuth_Actual_Speed", FR_Actual_Speed);
-    Telemetry.setValue("drivetrain/BL/Azimuth_Actual_Speed", BL_Actual_Speed);
-    Telemetry.setValue("drivetrain/BR/Azimuth_Actual_Speed", BR_Actual_Speed);
-    Telemetry.setValue("drivetrain/FL/Drive_Temp", FL_Drive.getTemperature());
-    Telemetry.setValue("drivetrain/FR/Drive_Temp", FR_Drive.getTemperature());
-    Telemetry.setValue("drivetrain/BL/Drive_Temp", BL_Drive.getTemperature());
-    Telemetry.setValue("drivetrain/BR/Drive_Temp", BR_Drive.getTemperature());
-    Telemetry.setValue("drivetrain/FL/Azimuth_Temp", FL_Azimuth.getTemperature());
-    Telemetry.setValue("drivetrain/FR/Azimuth_Temp", FR_Azimuth.getTemperature());
-    Telemetry.setValue("drivetrain/BL/Azimuth_Temp", BL_Azimuth.getTemperature());
-    Telemetry.setValue("drivetrain/BR/Azimuth_Temp", BR_Azimuth.getTemperature());
+    Telemetry.setValue("drivetrain/FL/Azimuth_Actual_Position", 0);
+    Telemetry.setValue("drivetrain/FR/Azimuth_Actual_Position", 0);
+    Telemetry.setValue("drivetrain/BL/Azimuth_Actual_Position", 0);
+    Telemetry.setValue("drivetrain/BR/Azimuth_Actual_Position", 0);
+    Telemetry.setValue("drivetrain/FL/Azimuth_Actual_Speed", 0);
+    Telemetry.setValue("drivetrain/FR/Azimuth_Actual_Speed", 0);
+    Telemetry.setValue("drivetrain/BL/Azimuth_Actual_Speed", 0);
+    Telemetry.setValue("drivetrain/BR/Azimuth_Actual_Speed", 0);
+    Telemetry.setValue("drivetrain/FL/Drive_Temp", 0);
+    Telemetry.setValue("drivetrain/FR/Drive_Temp", 0);
+    Telemetry.setValue("drivetrain/BL/Drive_Temp", 0);
+    Telemetry.setValue("drivetrain/BR/Drive_Temp", 0);
+    Telemetry.setValue("drivetrain/FL/Azimuth_Temp", 0);
+    Telemetry.setValue("drivetrain/FR/Azimuth_Temp", 0);
+    Telemetry.setValue("drivetrain/BL/Azimuth_Temp", 0);
+    Telemetry.setValue("drivetrain/BR/Azimuth_Temp", 0);
     Telemetry.setValue("drivetrain/isRobotOriented", isRobotOriented);
-    Telemetry.setValue("drivetrain/yaw", gyro.getYaw());
+    Telemetry.setValue("drivetrain/yaw", 0);
   }
 
   public void drive(double LX, double LY, double RX) {
@@ -413,6 +413,8 @@ public class Swerve extends SubsystemBase {
       BL_Power /= _speedRegulator;
       BR_Power /= _speedRegulator;
     }
+
+    // TODO: check field orient math, may need to alter commands per chimiswerve p10
 
     // read yaw from NavX and apply offset
     robotYaw = gyro.getYaw() + GYRO_OFFSET;
