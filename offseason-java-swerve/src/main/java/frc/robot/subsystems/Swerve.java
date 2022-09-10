@@ -80,6 +80,26 @@ public class Swerve extends SubsystemBase {
   private double _Path_2 = 0.0;
   private double _Path_3 = 0.0;
 
+  // temp variables used to calculate the chassis movement
+  /** B */ private double _frontTranslation = 0;
+  /** A */ private double _backTranslation = 0;
+  /** D */ private double _leftTranslation = 0;
+  /** C */ private double _rightTranslation = 0;
+  /** ROT */ private double _rotationTranslation = 0;
+  /** FWD */ private double _forwardTranslation = 0;
+  /** STR */ private double _sidewaysTranslation = 0;
+
+  private double _fieldForwardTranslation = 0;
+  private double _fieldSidewaysTranslation = 0;
+
+  private long _lastRunTime = System.currentTimeMillis();
+  private long _timeStep = 0;
+
+  private double _robotForwardPosition = 0;
+  private double _robotSidewaysPosition = 0;
+  private double _fieldForwardPosition = 0;
+  private double _fieldSidewaysPosition = 0;
+
   // swerve wheel speed ratio preservation while capping speeds at 100%
   private double _speedRegulator = 1.0;
 
@@ -227,10 +247,10 @@ public class Swerve extends SubsystemBase {
     // This method will be called once per scheduler run
 
     // 'actual' read sensor positions of each module
-    FL_Actual_Position = (FL_Azimuth.getSelectedSensorPosition() / 4096) * 360;
-    FR_Actual_Position = (FR_Azimuth.getSelectedSensorPosition() / 4096) * 360;
-    BL_Actual_Position = (BL_Azimuth.getSelectedSensorPosition() / 4096) * 360;
-    BR_Actual_Position = (BR_Azimuth.getSelectedSensorPosition() / 4096) * 360;
+    FL_Actual_Position = ((FL_Azimuth.getSelectedSensorPosition() / 4096) * 360) % 360;
+    FR_Actual_Position = ((FR_Azimuth.getSelectedSensorPosition() / 4096) * 360) % 360;
+    BL_Actual_Position = ((BL_Azimuth.getSelectedSensorPosition() / 4096) * 360) % 360;
+    BR_Actual_Position = ((BR_Azimuth.getSelectedSensorPosition() / 4096) * 360) % 360;
 
     // 'actual' read encoder speeds per module (feet per second)
     FL_Actual_Speed = (FL_Drive.getSelectedSensorVelocity() / 4096) * 10 * DRIVE_GEAR_RATIO * Math.PI * (WHEEL_DIAMETER / 12.0);
@@ -266,21 +286,37 @@ public class Swerve extends SubsystemBase {
     Telemetry.setValue("drivetrain/isRobotOriented", isRobotOriented);
     Telemetry.setValue("drivetrain/yaw", gyro.getYaw());
 
-    //TODO: Kinematics math + variables
+    _frontTranslation = ( (Math.sin(Math.toRadians(FL_Actual_Position)) * FL_Actual_Speed ) + (Math.sin(Math.toRadians(FR_Actual_Position)) * FR_Actual_Speed) ) / 2.0;
+    _backTranslation = ( (Math.sin(Math.toRadians(BL_Actual_Position)) * BL_Actual_Speed ) + (Math.sin(Math.toRadians(BR_Actual_Position)) * BR_Actual_Speed) ) / 2.0;
+    _leftTranslation = ( (Math.cos(Math.toRadians(FL_Actual_Position)) * FL_Actual_Speed ) + (Math.cos(Math.toRadians(BL_Actual_Position)) * BL_Actual_Speed) ) / 2.0;
+    _rightTranslation = ( (Math.cos(Math.toRadians(FR_Actual_Position)) * FL_Actual_Speed ) + (Math.cos(Math.toRadians(BR_Actual_Position)) * BL_Actual_Speed) ) / 2.0;
 
-    Telemetry.setValue("drivetrain/kinematics/robot/forward", 0);
-    Telemetry.setValue("drivetrain/kinematics/robot/rightward", 0);
-    Telemetry.setValue("drivetrain/kinematics/rotation", 0);
-    Telemetry.setValue("drivetrain/kinematics/field/DS_away", 0);
-    Telemetry.setValue("drivetrain/kinematics/field/DS_right", 0);
+    _rotationTranslation = ( ( (_frontTranslation - _backTranslation) / ROBOT_LENGTH ) + ( (_rightTranslation - _leftTranslation) / ROBOT_WIDTH ) ) / 2.0;
+    _forwardTranslation = ( (_rotationTranslation * (ROBOT_LENGTH/2.0) + _backTranslation) + (-_rotationTranslation * (ROBOT_LENGTH/2.0) + _frontTranslation) ) / 2.0;
+    _sidewaysTranslation = ( (_rotationTranslation * (ROBOT_WIDTH/2) + _rightTranslation) + (-_rotationTranslation * (ROBOT_WIDTH/2.0) + _leftTranslation) ) / 2.0;
 
-    //TODO: odometry math + variables
+    _fieldForwardTranslation = ( _forwardTranslation * Math.cos(Math.toRadians(gyro.getAngle())) + _sidewaysTranslation * Math.sin(Math.toRadians(gyro.getAngle())));
+    _fieldSidewaysTranslation =  ( _sidewaysTranslation * Math.cos(Math.toRadians(gyro.getAngle())) - _forwardTranslation * Math.sin(Math.toRadians(gyro.getAngle())));
 
-    Telemetry.setValue("drivetrain/odometry/robot/forward", 0);
-    Telemetry.setValue("drivetrain/odometry/robot/rightward", 0);
-    Telemetry.setValue("drivetrain/odometry/field/DS_away", 0);
-    Telemetry.setValue("drivetrain/odometry/field/DS_right", 0);
+    Telemetry.setValue("drivetrain/kinematics/robot/forward", _forwardTranslation);
+    Telemetry.setValue("drivetrain/kinematics/robot/rightward", _sidewaysTranslation);
+    Telemetry.setValue("drivetrain/kinematics/clockwise_speed", _rotationTranslation);
+    Telemetry.setValue("drivetrain/kinematics/field/DS_away",  _fieldForwardTranslation);
+    Telemetry.setValue("drivetrain/kinematics/field/DS_right", _fieldSidewaysTranslation );
 
+    _timeStep = System.currentTimeMillis() - _lastRunTime;
+
+    _robotForwardPosition += _forwardTranslation * (_timeStep / 1000);
+    _robotSidewaysPosition += _sidewaysTranslation * (_timeStep / 1000);
+    _fieldForwardPosition += _fieldForwardTranslation * (_timeStep / 1000);
+    _fieldSidewaysPosition += _fieldSidewaysTranslation * (_timeStep / 1000);
+
+    Telemetry.setValue("drivetrain/odometry/robot/forward", _robotForwardPosition);
+    Telemetry.setValue("drivetrain/odometry/robot/rightward", _robotSidewaysPosition);
+    Telemetry.setValue("drivetrain/odometry/field/DS_away", _fieldForwardPosition);
+    Telemetry.setValue("drivetrain/odometry/field/DS_right", _fieldSidewaysPosition);
+
+    _lastRunTime = System.currentTimeMillis();
   }
 
   @Override
