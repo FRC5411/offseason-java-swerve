@@ -117,9 +117,10 @@ public class Swerve extends SubsystemBase {
   // width = side to side (inches)
   public static final double ROBOT_WIDTH = 28.0;
   // wheel diameter (inches)
-  public static final double WHEEL_DIAMETER = 0;
+  public static final double WHEEL_DIAMETER = 4;
   // drive gear ratio
-  public static final double DRIVE_GEAR_RATIO = 1;
+  // TODO: check gear ratio (currently set to 'standard')
+  public static final double DRIVE_GEAR_RATIO = 1/8.14;
 
   // constants for calculating rotation vector
   private static final double ROTATION_Y = Math.sin(Math.atan2(ROBOT_LENGTH, ROBOT_WIDTH));
