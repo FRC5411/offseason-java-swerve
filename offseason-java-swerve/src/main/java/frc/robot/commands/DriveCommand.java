@@ -5,14 +5,14 @@
 package frc.robot.commands;
 
 import frc.robot.subsystems.Swerve;
-import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 
 /** An example command that uses an example subsystem. */
 public class DriveCommand extends CommandBase {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
   private final Swerve m_swerve;
-  private final Joystick m_driver;
+  private final XboxController m_driver;
   
   // controller axis values
   private double m_LX = 0.0;
@@ -24,7 +24,7 @@ public class DriveCommand extends CommandBase {
    *
    * @param subsystem The subsystem used by this command.
    */
-  public DriveCommand(Swerve drivetrain, Joystick driver) {
+  public DriveCommand(Swerve drivetrain, XboxController driver) {
     m_driver = driver;
     m_swerve = drivetrain;
     // Use addRequirements() here to declare subsystem dependencies.
