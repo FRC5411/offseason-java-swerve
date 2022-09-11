@@ -55,8 +55,8 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    aButton.whenPressed(new ToggleFieldOrientedDriveCommand(m_swerve));
-    bButton.whenPressed(new ZeroGyroYawCommand(m_swerve));
+    aButton.whenHeld(new ToggleFieldOrientedDriveCommand(m_swerve));
+    bButton.whenHeld(new ZeroGyroYawCommand(m_swerve));
   }
 
   /**

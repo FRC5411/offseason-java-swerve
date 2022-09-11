@@ -354,14 +354,6 @@ public class Swerve extends SubsystemBase {
 
   public void drive(double LX, double LY, double RX) {
 
-    // apply deadzone of 0.1 to each axis
-    if (Math.abs(LX) < 0.1)
-      LX = 0.0;
-    if (Math.abs(LY) < 0.1)
-      LY = 0.0;
-    if (Math.abs(RX) < 0.1)
-      RX = 0.0;
-
     // vector addition of strafe component (LX & LY) and rotation component
     // (ROTATION_X * RX)
     FL_X = LX + (ROTATION_X * RX);
@@ -428,10 +420,10 @@ public class Swerve extends SubsystemBase {
     // if joystick is idle, lock wheels to X formation to avoid pushing
     // TODO check if X-locking effective, if necesary; button toggle instead of default?
     if (LX == 0 && LY == 0 && RX == 0) {
-      FL_Target = (Math.toDegrees(Math.atan2(+ROTATION_Y, -ROTATION_X))) % 360;
-      FR_Target = (Math.toDegrees(Math.atan2(+ROTATION_Y, +ROTATION_X))) % 360;
+      FL_Target = (Math.toDegrees(Math.atan2( ROTATION_Y, -ROTATION_X))) % 360;
+      FR_Target = (Math.toDegrees(Math.atan2( ROTATION_Y,  ROTATION_X))) % 360;
       BL_Target = (Math.toDegrees(Math.atan2(-ROTATION_Y, -ROTATION_X))) % 360;
-      BR_Target = (Math.toDegrees(Math.atan2(-ROTATION_Y, +ROTATION_X))) % 360;
+      BR_Target = (Math.toDegrees(Math.atan2(-ROTATION_Y,  ROTATION_X))) % 360;
     }
 
     // find the shortest path to an equivalent position to prevent unneccesary full rotations
