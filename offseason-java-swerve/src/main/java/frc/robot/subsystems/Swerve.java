@@ -20,7 +20,7 @@ import frc.lib.Telemetry;
  * @author Rylan Moseley
  */
 public class Swerve extends SubsystemBase {
-  // TODO: acquire pigeon and replace NavX (AHRS) with pigeon API
+  // TODO: replace with Pigeon2.0
   /** Robot-mounted gyroscope (NavX or Pigeon) for field-centric driving and field positioning */
   private AHRS gyro;
 
@@ -140,7 +140,6 @@ public class Swerve extends SubsystemBase {
   private static final int BR_ECODER_OFFSET = 0;
 
   // pid values
-  // TODO get PID values from other code
   private static final double AZIMUTH_kP = 1.0;
   private static final double AZIMUTH_kD = 0.2;
 
