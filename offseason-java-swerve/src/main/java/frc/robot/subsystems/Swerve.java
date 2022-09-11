@@ -412,8 +412,6 @@ public class Swerve extends SubsystemBase {
       BR_Power /= _speedRegulator;
     }
 
-    // TODO: check field orient math, may need to alter commands per chimiswerve p10
-
     // read yaw from NavX and apply offset
     robotYaw = gyro.getYaw() + GYRO_OFFSET;
 
