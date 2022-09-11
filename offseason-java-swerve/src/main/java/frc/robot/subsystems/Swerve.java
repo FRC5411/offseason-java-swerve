@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.TalonFXInvertType;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
@@ -202,6 +203,7 @@ public class Swerve extends SubsystemBase {
     FL_Azimuth.configNeutralDeadband(AZIMUTH_NEUTRAL_BAND);
     FL_Azimuth.setNeutralMode(NeutralMode.Brake);
     FL_Azimuth.configRemoteFeedbackFilter(FL_Position, 0);
+    FL_Azimuth.configSelectedFeedbackSensor(FeedbackDevice.RemoteSensor0);
     FL_Azimuth.setSelectedSensorPosition(FL_Position.getAbsolutePosition());
     FL_Azimuth.config_kP(0, AZIMUTH_kP);
     FL_Azimuth.config_kI(0, AZIMUTH_kI);
@@ -213,6 +215,7 @@ public class Swerve extends SubsystemBase {
     FR_Azimuth.configNeutralDeadband(AZIMUTH_NEUTRAL_BAND);
     FR_Azimuth.setNeutralMode(NeutralMode.Brake);
     FR_Azimuth.configRemoteFeedbackFilter(FR_Position, 0);
+    FR_Azimuth.configSelectedFeedbackSensor(FeedbackDevice.RemoteSensor0);
     FR_Azimuth.setSelectedSensorPosition(FR_Position.getAbsolutePosition());
     FR_Azimuth.config_kP(0, AZIMUTH_kP);
     FR_Azimuth.config_kI(0, AZIMUTH_kI);
@@ -224,6 +227,7 @@ public class Swerve extends SubsystemBase {
     BL_Azimuth.configNeutralDeadband(AZIMUTH_NEUTRAL_BAND);
     BL_Azimuth.setNeutralMode(NeutralMode.Brake);
     BL_Azimuth.configRemoteFeedbackFilter(BL_Position, 0);
+    BL_Azimuth.configSelectedFeedbackSensor(FeedbackDevice.RemoteSensor0);
     BL_Azimuth.setSelectedSensorPosition(BL_Position.getAbsolutePosition());
     BL_Azimuth.config_kP(0, AZIMUTH_kP);
     BL_Azimuth.config_kI(0, AZIMUTH_kI);
@@ -235,6 +239,7 @@ public class Swerve extends SubsystemBase {
     BR_Azimuth.configNeutralDeadband(AZIMUTH_NEUTRAL_BAND);
     BR_Azimuth.setNeutralMode(NeutralMode.Brake);
     BR_Azimuth.configRemoteFeedbackFilter(BR_Position, 0);
+    BR_Azimuth.configSelectedFeedbackSensor(FeedbackDevice.RemoteSensor0);
     BR_Azimuth.setSelectedSensorPosition(BR_Position.getAbsolutePosition());
     BR_Azimuth.config_kP(0, AZIMUTH_kP);
     BR_Azimuth.config_kI(0, AZIMUTH_kI);
