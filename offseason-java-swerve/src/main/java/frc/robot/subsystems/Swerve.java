@@ -33,7 +33,7 @@ public class Swerve extends SubsystemBase {
   // swerve module drive motors
   private final TalonFX FL_Drive = new TalonFX(11);
   private final TalonFX FR_Drive = new TalonFX(12);
-  private final TalonFX BL_Drive = new TalonFX(12);
+  private final TalonFX BL_Drive = new TalonFX(13);
   private final TalonFX BR_Drive = new TalonFX(14);
 
   // swerve module azimuth (steering) motors
