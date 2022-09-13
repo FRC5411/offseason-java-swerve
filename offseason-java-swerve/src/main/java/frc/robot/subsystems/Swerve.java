@@ -133,7 +133,6 @@ public class Swerve extends SubsystemBase {
 
 
   // encoder offsets (degrees)
-  // TODO: measure encoder offsets
   private static final double FL_ECODER_OFFSET = -223.682;
   private static final double FR_ECODER_OFFSET = -76.553;
   private static final double BL_ECODER_OFFSET = -156.006;
