@@ -140,8 +140,8 @@ public class Swerve extends SubsystemBase {
   private static final int BR_ECODER_OFFSET = 0;
 
   // pid values
-  private static final double AZIMUTH_kP = 1.0;
-  private static final double AZIMUTH_kD = 0.2;
+  private static final double AZIMUTH_kP = 0.3;
+  private static final double AZIMUTH_kD = 0.1;
 
   /** Creates a new ExampleSubsystem. */
   public Swerve(AHRS NavX) {
