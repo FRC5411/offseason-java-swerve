@@ -411,7 +411,6 @@ public class Swerve extends SubsystemBase {
     BR_Target += isRobotOriented ? 0.0 : robotYaw;
 
     // if joystick is idle, lock wheels to X formation to avoid pushing
-    // TODO check if X-locking effective, if necesary; button toggle instead of default?
     if (LX == 0 && LY == 0 && RX == 0) {
       FL_Target = (Math.toDegrees(Math.atan2( ROTATION_Y, -ROTATION_X))) % 360;
       FR_Target = (Math.toDegrees(Math.atan2( ROTATION_Y,  ROTATION_X))) % 360;
