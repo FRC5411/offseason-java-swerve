@@ -33,7 +33,7 @@ public class Swerve extends SubsystemBase {
   // swerve module drive motors
   private final TalonFX FL_Drive = new TalonFX(11);
   private final TalonFX FR_Drive = new TalonFX(12);
-  private final TalonFX BL_Drive = new TalonFX(12);
+  private final TalonFX BL_Drive = new TalonFX(13);
   private final TalonFX BR_Drive = new TalonFX(14);
 
   // swerve module azimuth (steering) motors
@@ -133,15 +133,14 @@ public class Swerve extends SubsystemBase {
 
 
   // encoder offsets (degrees)
-  // TODO: measure encoder offsets
-  private static final int FL_ECODER_OFFSET = 0;
-  private static final int FR_ECODER_OFFSET = 0;
-  private static final int BL_ECODER_OFFSET = 0;
-  private static final int BR_ECODER_OFFSET = 0;
+  private static final double FL_ECODER_OFFSET = -223.682;
+  private static final double FR_ECODER_OFFSET = -76.553;
+  private static final double BL_ECODER_OFFSET = -156.006;
+  private static final double BR_ECODER_OFFSET = -114.258;
 
   // pid values
-  private static final double AZIMUTH_kP = 1.0;
-  private static final double AZIMUTH_kD = 0.2;
+  private static final double AZIMUTH_kP = 0.3;
+  private static final double AZIMUTH_kD = 0.1;
 
   /** Creates a new ExampleSubsystem. */
   public Swerve(AHRS NavX) {
@@ -411,7 +410,6 @@ public class Swerve extends SubsystemBase {
     robotYaw = gyro.getYaw() + GYRO_OFFSET;
 
     // if joystick is idle, lock wheels to X formation to avoid pushing
-    // TODO check if X-locking effective, if necesary; button toggle instead of default?
     if (LX == 0 && LY == 0 && RX == 0) {
       FL_Target = (Math.toDegrees(Math.atan2( ROTATION_Y, -ROTATION_X))) % 360;
       FR_Target = (Math.toDegrees(Math.atan2( ROTATION_Y,  ROTATION_X))) % 360;
