@@ -348,10 +348,12 @@ public class Swerve extends SubsystemBase {
 
   public void drive(double LX, double LY, double RX) {
 
+    robotYaw = gyro.getYaw();
+
     // field orient
     if (!isRobotOriented) {
-      LY = LY * Math.cos(Math.toRadians(gyro.getYaw())) + LX * Math.sin(Math.toRadians(gyro.getYaw()));
-      LX = LX * Math.cos(Math.toRadians(gyro.getYaw())) - LY * Math.sin(Math.toRadians(gyro.getYaw()));
+      LY = LY * Math.cos(Math.toRadians(robotYaw)) + LX * Math.sin(Math.toRadians(robotYaw));
+      LX = LX * Math.cos(Math.toRadians(robotYaw)) - LY * Math.sin(Math.toRadians(robotYaw));
     }
 
     // vector addition of strafe component (LX & LY) and rotation component
@@ -405,9 +407,6 @@ public class Swerve extends SubsystemBase {
       BL_Power /= _speedRegulator;
       BR_Power /= _speedRegulator;
     }
-
-    // read yaw from NavX and apply offset
-    robotYaw = gyro.getYaw() + GYRO_OFFSET;
 
     // if joystick is idle, lock wheels to X formation to avoid pushing
     if (LX == 0 && LY == 0 && RX == 0) {
