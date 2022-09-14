@@ -106,8 +106,6 @@ public class Swerve extends SubsystemBase {
 
   // the read yaw value from the NavX
   private double robotYaw = 0.0;
-  // the rotation offset of the NavX to the robot (degrees)
-  private static final double GYRO_OFFSET = 0.0;
 
   // robot oriented / field oriented swerve drive toggle
   private boolean isRobotOriented = true;
