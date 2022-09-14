@@ -106,8 +106,6 @@ public class Swerve extends SubsystemBase {
 
   // the read yaw value from the NavX
   private double robotYaw = 0.0;
-  // the rotation offset of the NavX to the robot (degrees)
-  private static final double GYRO_OFFSET = 0.0;
 
   // robot oriented / field oriented swerve drive toggle
   private boolean isRobotOriented = true;
@@ -348,6 +346,14 @@ public class Swerve extends SubsystemBase {
 
   public void drive(double LX, double LY, double RX) {
 
+    robotYaw = gyro.getYaw();
+
+    // field orient
+    if (!isRobotOriented) {
+      LY = LY * Math.cos(Math.toRadians(robotYaw)) + LX * Math.sin(Math.toRadians(robotYaw));
+      LX = LX * Math.cos(Math.toRadians(robotYaw)) - LY * Math.sin(Math.toRadians(robotYaw));
+    }
+
     // vector addition of strafe component (LX & LY) and rotation component
     // (ROTATION_X * RX)
     FL_X = LX + (ROTATION_X * RX);
@@ -399,15 +405,6 @@ public class Swerve extends SubsystemBase {
       BL_Power /= _speedRegulator;
       BR_Power /= _speedRegulator;
     }
-
-    // read yaw from NavX and apply offset
-    robotYaw = gyro.getYaw() + GYRO_OFFSET;
-
-    // field orientation
-    FL_Target += isRobotOriented ? 0.0 : robotYaw;
-    FR_Target += isRobotOriented ? 0.0 : robotYaw;
-    BL_Target += isRobotOriented ? 0.0 : robotYaw;
-    BR_Target += isRobotOriented ? 0.0 : robotYaw;
 
     // if joystick is idle, lock wheels to X formation to avoid pushing
     if (LX == 0 && LY == 0 && RX == 0) {
