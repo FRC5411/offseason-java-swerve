@@ -351,7 +351,7 @@ public class Swerve extends SubsystemBase {
     // field orient
     if (!isRobotOriented) {
       LY = LY * Math.cos(Math.toRadians(robotYaw)) + LX * Math.sin(Math.toRadians(robotYaw));
-      LX = LX * Math.cos(Math.toRadians(robotYaw)) - LY * Math.sin(Math.toRadians(robotYaw));
+      LX = LX * Math.cos(Math.toRadians(robotYaw)) - ((LY/Math.cos(Math.toRadians(robotYaw))) - LX * Math.sin(Math.toRadians(robotYaw))) * Math.sin(Math.toRadians(robotYaw));
     }
 
     // vector addition of strafe component (LX & LY) and rotation component
