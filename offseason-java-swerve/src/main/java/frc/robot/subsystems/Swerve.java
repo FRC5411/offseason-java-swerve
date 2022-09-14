@@ -300,10 +300,10 @@ public class Swerve extends SubsystemBase {
 
     _timeStep = System.currentTimeMillis() - _lastRunTime;
 
-    _robotForwardPosition += _forwardTranslation * (_timeStep / 1000);
-    _robotSidewaysPosition += _sidewaysTranslation * (_timeStep / 1000);
-    _fieldForwardPosition += _fieldForwardTranslation * (_timeStep / 1000);
-    _fieldSidewaysPosition += _fieldSidewaysTranslation * (_timeStep / 1000);
+    _robotForwardPosition += _forwardTranslation * (_timeStep);
+    _robotSidewaysPosition += _sidewaysTranslation * (_timeStep);
+    _fieldForwardPosition += _fieldForwardTranslation * (_timeStep);
+    _fieldSidewaysPosition += _fieldSidewaysTranslation * (_timeStep);
 
     Telemetry.setValue("drivetrain/odometry/robot/forward", _robotForwardPosition);
     Telemetry.setValue("drivetrain/odometry/robot/rightward", _robotSidewaysPosition);
