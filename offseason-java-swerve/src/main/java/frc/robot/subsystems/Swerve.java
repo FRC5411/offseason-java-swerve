@@ -312,6 +312,7 @@ public class Swerve extends SubsystemBase {
     Telemetry.setValue("drivetrain/Modules/FR/Drive/Stator_Current", FR_Drive.getStatorCurrent());
     Telemetry.setValue("drivetrain/Modules/BL/Drive/Stator_Current", BL_Drive.getStatorCurrent());
     Telemetry.setValue("drivetrain/Modules/BR/Drive/Stator_Current", BR_Drive.getStatorCurrent());
+    Telemetry.setValue("drivetrain/Gyro_Temperature", gyro.getTempC());
     Telemetry.setValue("drivetrain/isRobotOriented", isRobotOriented);
     Telemetry.setValue("drivetrain/yaw", gyro.getYaw());
 
