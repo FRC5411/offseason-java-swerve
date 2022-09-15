@@ -129,7 +129,8 @@ public class Swerve extends SubsystemBase {
   private static final double AZIMUTH_NEUTRAL_BAND = 0.001; // TODO: tune azimuth motor neutral band
 
   private static final double DRIVE_RAMP_RATE = 0; // TODO: tune drive motor ramp rate
-
+  
+  private static final StatorCurrentLimitConfiguration DRIVE_CURRENT_LIMIT = new StatorCurrentLimitConfiguration(); // TODO: tune drive motor stator current limit
 
   // encoder offsets (degrees)
   private static final double FL_ECODER_OFFSET = -223.682;
@@ -140,8 +141,6 @@ public class Swerve extends SubsystemBase {
   // pid values
   private static final double AZIMUTH_kP = 0.3;
   private static final double AZIMUTH_kD = 0.1;
-
-  private static final StatorCurrentLimitConfiguration DRIVE_CURRENT_LIMIT = new StatorCurrentLimitConfiguration();
 
   /** Creates a new ExampleSubsystem. */
   public Swerve(AHRS NavX) {
