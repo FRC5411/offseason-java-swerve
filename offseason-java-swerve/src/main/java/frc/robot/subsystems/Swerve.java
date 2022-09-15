@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix.motorcontrol.StatorCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.TalonFXInvertType;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.sensors.CANCoder;
@@ -140,6 +141,8 @@ public class Swerve extends SubsystemBase {
   private static final double AZIMUTH_kP = 0.3;
   private static final double AZIMUTH_kD = 0.1;
 
+  private static final StatorCurrentLimitConfiguration DRIVE_CURRENT_LIMIT = new StatorCurrentLimitConfiguration();
+
   /** Creates a new ExampleSubsystem. */
   public Swerve(AHRS NavX) {
 
@@ -152,24 +155,28 @@ public class Swerve extends SubsystemBase {
     FL_Drive.setNeutralMode(NeutralMode.Brake);
     FL_Drive.configNeutralDeadband(DRIVE_NEUTRAL_BAND);
     FL_Drive.configOpenloopRamp(DRIVE_RAMP_RATE);
-
+    FL_Drive.configStatorCurrentLimit(DRIVE_CURRENT_LIMIT);
+    
     FR_Drive.configFactoryDefault();
     FR_Drive.setInverted(TalonFXInvertType.CounterClockwise);
     FR_Drive.setNeutralMode(NeutralMode.Brake);
     FR_Drive.configNeutralDeadband(DRIVE_NEUTRAL_BAND);
     FR_Drive.configOpenloopRamp(DRIVE_RAMP_RATE);
+    FR_Drive.configStatorCurrentLimit(DRIVE_CURRENT_LIMIT);
 
     BL_Drive.configFactoryDefault();
     BL_Drive.setInverted(TalonFXInvertType.CounterClockwise);
     BL_Drive.setNeutralMode(NeutralMode.Brake);
     BL_Drive.configNeutralDeadband(DRIVE_NEUTRAL_BAND);
     BL_Drive.configOpenloopRamp(DRIVE_RAMP_RATE);
+    BL_Drive.configStatorCurrentLimit(DRIVE_CURRENT_LIMIT);
 
     BR_Drive.configFactoryDefault();
     BR_Drive.setInverted(TalonFXInvertType.CounterClockwise);
     BR_Drive.setNeutralMode(NeutralMode.Brake);
     BR_Drive.configNeutralDeadband(DRIVE_NEUTRAL_BAND);
     BR_Drive.configOpenloopRamp(DRIVE_RAMP_RATE);
+    BR_Drive.configStatorCurrentLimit(DRIVE_CURRENT_LIMIT);
 
     // config CANcoders
     FL_Position.configFactoryDefault();
