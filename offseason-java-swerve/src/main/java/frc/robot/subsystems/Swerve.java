@@ -350,37 +350,7 @@ public class Swerve extends SubsystemBase {
   }
 
   @Override
-  public void simulationPeriodic() {
-    // This method will be called once per scheduler run during simulation
-
-    // dashboard data
-    Telemetry.setValue("drivetrain/FL/Azimuth_Target", FL_Target);
-    Telemetry.setValue("drivetrain/FR/Azimuth_Target", FR_Target);
-    Telemetry.setValue("drivetrain/BL/Azimuth_Target", BL_Target);
-    Telemetry.setValue("drivetrain/BR/Azimuth_Target", BR_Target);
-    Telemetry.setValue("drivetrain/FL/Drive_Power", FL_Power);
-    Telemetry.setValue("drivetrain/FR/Drive_Power", FR_Power);
-    Telemetry.setValue("drivetrain/BL/Drive_Power", BL_Power);
-    Telemetry.setValue("drivetrain/BR/Drive_Power", BR_Power);
-    Telemetry.setValue("drivetrain/FL/Azimuth_Actual_Position", 0);
-    Telemetry.setValue("drivetrain/FR/Azimuth_Actual_Position", 0);
-    Telemetry.setValue("drivetrain/BL/Azimuth_Actual_Position", 0);
-    Telemetry.setValue("drivetrain/BR/Azimuth_Actual_Position", 0);
-    Telemetry.setValue("drivetrain/FL/Drive_Actual_Speed", 0);
-    Telemetry.setValue("drivetrain/FR/Drive_Actual_Speed", 0);
-    Telemetry.setValue("drivetrain/BL/Drive_Actual_Speed", 0);
-    Telemetry.setValue("drivetrain/BR/Drive_Actual_Speed", 0);
-    Telemetry.setValue("drivetrain/FL/Drive_Temp", 0);
-    Telemetry.setValue("drivetrain/FR/Drive_Temp", 0);
-    Telemetry.setValue("drivetrain/BL/Drive_Temp", 0);
-    Telemetry.setValue("drivetrain/BR/Drive_Temp", 0);
-    Telemetry.setValue("drivetrain/FL/Azimuth_Temp", 0);
-    Telemetry.setValue("drivetrain/FR/Azimuth_Temp", 0);
-    Telemetry.setValue("drivetrain/BL/Azimuth_Temp", 0);
-    Telemetry.setValue("drivetrain/BR/Azimuth_Temp", 0);
-    Telemetry.setValue("drivetrain/isRobotOriented", isRobotOriented);
-    Telemetry.setValue("drivetrain/yaw", 0);
-  }
+  public void simulationPeriodic() {}
 
   public void drive(double LX, double LY, double RX) {
 
