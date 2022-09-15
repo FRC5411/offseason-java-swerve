@@ -4,9 +4,11 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.lib.Telemetry;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -15,6 +17,8 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
  * project.
  */
 public class Robot extends TimedRobot {
+  private PowerDistribution PDH = new PowerDistribution();
+
   private Command m_autonomousCommand;
 
   private RobotContainer m_robotContainer;
@@ -39,6 +43,10 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotPeriodic() {
+    Telemetry.setValue("general/PDP/Voltage", PDH.getVoltage());
+    Telemetry.setValue("general/PDP/Current", PDH.getTotalCurrent());
+    Telemetry.setValue("general/PDP/Temperature", PDH.getTemperature());
+
     // Runs the Scheduler.  This is responsible for polling buttons, adding newly-scheduled
     // commands, running already-scheduled commands, removing finished or interrupted commands,
     // and running subsystem periodic() methods.  This must be called from the robot's periodic
