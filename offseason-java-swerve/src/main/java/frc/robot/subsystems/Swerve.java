@@ -12,8 +12,8 @@ import com.ctre.phoenix.motorcontrol.StatorCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.TalonFXInvertType;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.sensors.CANCoder;
+import com.ctre.phoenix.sensors.Pigeon2;
 import com.ctre.phoenix.sensors.SensorInitializationStrategy;
-import com.kauailabs.navx.frc.AHRS;
 import frc.lib.Telemetry;
 
 /** 
@@ -23,7 +23,7 @@ import frc.lib.Telemetry;
 public class Swerve extends SubsystemBase {
   // TODO: replace with Pigeon2.0
   /** Robot-mounted gyroscope (NavX or Pigeon) for field-centric driving and field positioning */
-  private AHRS gyro;
+  private Pigeon2 gyro;
 
   // swerve module CANCoders
   private final CANCoder FL_Position = new CANCoder(5);
@@ -143,9 +143,9 @@ public class Swerve extends SubsystemBase {
   private static final double AZIMUTH_kD = 0.1;
 
   /** Creates a new ExampleSubsystem. */
-  public Swerve(AHRS NavX) {
+  public Swerve(Pigeon2 pigeon) {
 
-    gyro = NavX;
+    gyro = pigeon;
 
     // config drive motors
     FL_Drive.configFactoryDefault();
@@ -312,7 +312,7 @@ public class Swerve extends SubsystemBase {
     Telemetry.setValue("drivetrain/Modules/FR/Drive/Stator_Current", FR_Drive.getStatorCurrent());
     Telemetry.setValue("drivetrain/Modules/BL/Drive/Stator_Current", BL_Drive.getStatorCurrent());
     Telemetry.setValue("drivetrain/Modules/BR/Drive/Stator_Current", BR_Drive.getStatorCurrent());
-    Telemetry.setValue("drivetrain/Gyro_Temperature", gyro.getTempC());
+    Telemetry.setValue("drivetrain/Gyro_Temperature", gyro.getTemp());
     Telemetry.setValue("drivetrain/isRobotOriented", isRobotOriented);
     Telemetry.setValue("drivetrain/yaw", gyro.getYaw());
 
@@ -325,8 +325,8 @@ public class Swerve extends SubsystemBase {
     _forwardTranslation = ( (_rotationTranslation * (ROBOT_LENGTH/2.0) + _backTranslation) + (-_rotationTranslation * (ROBOT_LENGTH/2.0) + _frontTranslation) ) / 2.0;
     _sidewaysTranslation = ( (_rotationTranslation * (ROBOT_WIDTH/2) + _rightTranslation) + (-_rotationTranslation * (ROBOT_WIDTH/2.0) + _leftTranslation) ) / 2.0;
 
-    _fieldForwardTranslation = ( _forwardTranslation * Math.cos(Math.toRadians(gyro.getAngle())) + _sidewaysTranslation * Math.sin(Math.toRadians(gyro.getAngle())));
-    _fieldSidewaysTranslation =  ( _sidewaysTranslation * Math.cos(Math.toRadians(gyro.getAngle())) - _forwardTranslation * Math.sin(Math.toRadians(gyro.getAngle())));
+    _fieldForwardTranslation = ( _forwardTranslation * Math.cos(Math.toRadians(gyro.getYaw())) + _sidewaysTranslation * Math.sin(Math.toRadians(gyro.getYaw())));
+    _fieldSidewaysTranslation =  ( _sidewaysTranslation * Math.cos(Math.toRadians(gyro.getYaw())) - _forwardTranslation * Math.sin(Math.toRadians(gyro.getYaw())));
 
     Telemetry.setValue("drivetrain/kinematics/robot/forward", _forwardTranslation);
     Telemetry.setValue("drivetrain/kinematics/robot/rightward", _sidewaysTranslation);
@@ -471,7 +471,7 @@ public class Swerve extends SubsystemBase {
 
   /** Sets the gyroscope's current heading to 0 */
   public void zeroGyro() {
-    gyro.zeroYaw();
+    gyro.zeroGyroBiasNow();
   }
 
   /** toggles field/robot orientation

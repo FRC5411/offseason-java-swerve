@@ -13,8 +13,7 @@ import frc.robot.subsystems.Swerve;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import edu.wpi.first.wpilibj.SPI;
-import com.kauailabs.navx.frc.AHRS;
+import com.ctre.phoenix.sensors.Pigeon2;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -27,11 +26,11 @@ public class RobotContainer {
   private final XboxController driver = new XboxController(0);
 
   // NavX gyro/accelerometer
-  AHRS NavX = new AHRS(SPI.Port.kMXP); 
+  Pigeon2 pigeon = new Pigeon2(4); 
 
   // The robot's subsystems and commands are defined here...
   private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
-  private final Swerve m_swerve = new Swerve(NavX);
+  private final Swerve m_swerve = new Swerve(pigeon);
 
   private final ExampleCommand m_autoCommand = new ExampleCommand(m_exampleSubsystem);
 
