@@ -21,7 +21,6 @@ import frc.lib.Telemetry;
  * @author Rylan Moseley
  */
 public class Swerve extends SubsystemBase {
-  // TODO: replace with Pigeon2.0
   /** Robot-mounted gyroscope (NavX or Pigeon) for field-centric driving and field positioning */
   private Pigeon2 gyro;
 
