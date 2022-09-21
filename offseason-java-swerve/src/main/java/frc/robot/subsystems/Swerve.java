@@ -470,7 +470,7 @@ public class Swerve extends SubsystemBase {
 
   /** Sets the gyroscope's current heading to 0 */
   public void zeroGyro() {
-    gyro.zeroGyroBiasNow();
+    gyro.setYaw(0);
   }
 
   /** toggles field/robot orientation
