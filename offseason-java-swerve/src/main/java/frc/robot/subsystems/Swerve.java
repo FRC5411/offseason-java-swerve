@@ -125,7 +125,6 @@ public class Swerve extends SubsystemBase {
   private static final double ROTATION_X = Math.cos(Math.atan2(ROBOT_LENGTH, ROBOT_WIDTH));
 
   private static final double DRIVE_NEUTRAL_BAND = 0.001; // TODO: tune drive motor neutral band
-  private static final double AZIMUTH_NEUTRAL_BAND = 0.001; // TODO: tune azimuth motor neutral band
 
   private static final double DRIVE_RAMP_RATE = 0; // TODO: tune drive motor ramp rate
   
@@ -199,7 +198,6 @@ public class Swerve extends SubsystemBase {
     // config azimuth (steering) motors
     FL_Azimuth.configFactoryDefault();
     FL_Azimuth.setInverted(TalonFXInvertType.CounterClockwise);
-    FL_Azimuth.configNeutralDeadband(AZIMUTH_NEUTRAL_BAND);
     FL_Azimuth.setNeutralMode(NeutralMode.Brake);
     FL_Azimuth.configRemoteFeedbackFilter(FL_Position, 0);
     FL_Azimuth.configSelectedFeedbackSensor(FeedbackDevice.RemoteSensor0);
@@ -209,7 +207,6 @@ public class Swerve extends SubsystemBase {
 
     FR_Azimuth.configFactoryDefault();
     FR_Azimuth.setInverted(TalonFXInvertType.CounterClockwise);
-    FR_Azimuth.configNeutralDeadband(AZIMUTH_NEUTRAL_BAND);
     FR_Azimuth.setNeutralMode(NeutralMode.Brake);
     FR_Azimuth.configRemoteFeedbackFilter(FR_Position, 0);
     FR_Azimuth.configSelectedFeedbackSensor(FeedbackDevice.RemoteSensor0);
@@ -219,7 +216,6 @@ public class Swerve extends SubsystemBase {
 
     BL_Azimuth.configFactoryDefault();
     BL_Azimuth.setInverted(TalonFXInvertType.CounterClockwise);
-    BL_Azimuth.configNeutralDeadband(AZIMUTH_NEUTRAL_BAND);
     BL_Azimuth.setNeutralMode(NeutralMode.Brake);
     BL_Azimuth.configRemoteFeedbackFilter(BL_Position, 0);
     BL_Azimuth.configSelectedFeedbackSensor(FeedbackDevice.RemoteSensor0);
@@ -229,7 +225,6 @@ public class Swerve extends SubsystemBase {
 
     BR_Azimuth.configFactoryDefault();
     BR_Azimuth.setInverted(TalonFXInvertType.CounterClockwise);
-    BR_Azimuth.configNeutralDeadband(AZIMUTH_NEUTRAL_BAND);
     BR_Azimuth.setNeutralMode(NeutralMode.Brake);
     BR_Azimuth.configRemoteFeedbackFilter(BR_Position, 0);
     BR_Azimuth.configSelectedFeedbackSensor(FeedbackDevice.RemoteSensor0);
