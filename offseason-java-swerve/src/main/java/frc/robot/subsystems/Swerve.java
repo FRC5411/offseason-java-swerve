@@ -138,7 +138,7 @@ public class Swerve extends SubsystemBase {
 
   // pid values
   private static final double AZIMUTH_kP = 0.3;
-  private static final double AZIMUTH_kD = 0.1;
+  private static final double AZIMUTH_kD = 0.2;
 
   /** Creates a new ExampleSubsystem. */
   public Swerve(Pigeon2 pigeon) {
@@ -330,10 +330,10 @@ public class Swerve extends SubsystemBase {
 
     _timeStep = System.currentTimeMillis() - _lastRunTime;
 
-    _robotForwardPosition += _forwardTranslation * (_timeStep / 1000);
-    _robotSidewaysPosition += _sidewaysTranslation * (_timeStep / 1000);
-    _fieldForwardPosition += _fieldForwardTranslation * (_timeStep / 1000);
-    _fieldSidewaysPosition += _fieldSidewaysTranslation * (_timeStep / 1000);
+    _robotForwardPosition += _forwardTranslation * (_timeStep / 1000.0);
+    _robotSidewaysPosition += _sidewaysTranslation * (_timeStep / 1000.0);
+    _fieldForwardPosition += _fieldForwardTranslation * (_timeStep / 1000.0);
+    _fieldSidewaysPosition += _fieldSidewaysTranslation * (_timeStep / 1000.0);
 
     Telemetry.setValue("drivetrain/odometry/robot/forward", _robotForwardPosition);
     Telemetry.setValue("drivetrain/odometry/robot/rightward", _robotSidewaysPosition);
@@ -424,7 +424,7 @@ public class Swerve extends SubsystemBase {
       FL_Target += 360;
     if (Math.min(Math.min(_Path_1, _Path_2), _Path_3) == _Path_3)
       FL_Target -= 360;
-
+    
     _Path_1 = Math.abs(FR_Target - FR_Actual_Position);
     _Path_2 = Math.abs((FR_Target + 360) - FR_Actual_Position);
     _Path_3 = Math.abs((FR_Target - 360) - FR_Actual_Position);
