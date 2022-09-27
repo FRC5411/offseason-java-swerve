@@ -45,9 +45,9 @@ public class DriveCommand extends CommandBase {
     m_RX = m_driver.getRawAxis(4); // right x axis (rotation)
 
     // deadzones
-    m_LX = ( Math.abs(m_LX) < 0.1 ) ? 0 : m_LX;
-    m_LY = ( Math.abs(m_LY) < 0.1 ) ? 0 : m_LY;
-    m_RX = ( Math.abs(m_RX) < 0.1 ) ? 0 : m_RX;
+    m_LX = ( Math.abs(m_LX) < 0.2 ) ? 0 : m_LX;
+    m_LY = ( Math.abs(m_LY) < 0.2 ) ? 0 : m_LY;
+    m_RX = ( Math.abs(m_RX) < 0.2 ) ? 0 : m_RX;
 
     // square joysticks
     m_LX = m_LX * m_LX * ( Math.abs(m_LX) / (m_LX == 0 ? 1 : m_LX ) );
