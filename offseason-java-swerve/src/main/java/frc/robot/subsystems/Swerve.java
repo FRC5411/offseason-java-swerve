@@ -150,6 +150,8 @@ public class Swerve extends SubsystemBase {
 
   private SwerveModuleState[] modules = new SwerveModuleState[3];
 
+  private short[] accelerometerData = new short[2];
+
   /** Creates a new ExampleSubsystem. */
   public Swerve(Pigeon2 pigeon) {
 
@@ -372,6 +374,10 @@ public class Swerve extends SubsystemBase {
     Telemetry.setValue("drivetrain/odometry/official/robot/rightward", 0);
     Telemetry.setValue("drivetrain/odometry/official/field/DS_away", 0);
     Telemetry.setValue("drivetrain/odometry/official/field/DS_right", 0);
+
+    gyro.getBiasedAccelerometer(accelerometerData);
+    Telemetry.setValue("drivetrain/kinematics/gyro/robot/forward_acceleration", (double) accelerometerData[1]);
+    Telemetry.setValue("drivetrain/kinematics/gyro/robot/rightward_acceleration", (double) accelerometerData[0]);
   }
 
   @Override
