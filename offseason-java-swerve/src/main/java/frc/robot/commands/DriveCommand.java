@@ -54,7 +54,7 @@ public class DriveCommand extends CommandBase {
     m_LY = m_LY * m_LY * ( Math.abs(m_LY) / (m_LY == 0 ? 1 : m_LY ) );
     m_RX = m_RX * m_RX * ( Math.abs(m_RX) / (m_RX == 0 ? 1 : m_RX ) );
     
-    m_swerve.drive(m_LX, m_LY, m_RX);
+    m_swerve.joystickDrive(m_LX, m_LY, m_RX);
   }
 
   // Called once the command ends or is interrupted.

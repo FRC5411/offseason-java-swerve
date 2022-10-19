@@ -4,6 +4,11 @@
 
 package frc.robot.subsystems;
 
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
@@ -49,20 +54,10 @@ public class Swerve extends SubsystemBase {
   private double BR_Target = 0.0;
 
   // swerve module wheel speeds (percent output)
-  private double FL_Power = 0.0;
-  private double FR_Power = 0.0;
-  private double BL_Power = 0.0;
-  private double BR_Power = 0.0;
-
-  // swerve module vector components
-  private double FL_X = 0.0;
-  private double FR_X = 0.0;
-  private double BL_X = 0.0;
-  private double BR_X = 0.0;
-  private double FL_Y = 0.0;
-  private double FR_Y = 0.0;
-  private double BL_Y = 0.0;
-  private double BR_Y = 0.0;
+  private double FL_Speed = 0.0;
+  private double FR_Speed = 0.0;
+  private double BL_Speed = 0.0;
+  private double BR_Speed = 0.0;
 
   // 'actual' read positions of each swerve module (degrees)
   private double FL_Actual_Position = 0.0;
@@ -70,7 +65,7 @@ public class Swerve extends SubsystemBase {
   private double BL_Actual_Position = 0.0;
   private double BR_Actual_Position = 0.0;
 
-  // 'actual' read speeds of each swerve module (feet per second)
+  // 'actual' read speeds of each swerve module (meters per second)
   private double FL_Actual_Speed = 0.0;
   private double FR_Actual_Speed = 0.0;
   private double BL_Actual_Speed = 0.0;
@@ -101,28 +96,24 @@ public class Swerve extends SubsystemBase {
   private double _fieldForwardPosition = 0;
   private double _fieldSidewaysPosition = 0;
 
-  // swerve wheel speed ratio preservation while capping speeds at 100%
-  private double _speedRegulator = 1.0;
-
   // the read yaw value from the NavX
   private double robotYaw = 0.0;
 
   // robot oriented / field oriented swerve drive toggle
   private boolean isRobotOriented = true;
-
-  // length = front to back (inches)
-  public static final double ROBOT_LENGTH = 31.0;
-  // width = side to side (inches)
-  public static final double ROBOT_WIDTH = 28.0;
-  // wheel diameter (inches)
-  public static final double WHEEL_DIAMETER = 4;
+  // length = front to back (meters)
+  public static final double ROBOT_LENGTH_METERS = 0.7874;
+  // width = side to side (meters)
+  public static final double ROBOT_WIDTH_METERS = 0.7112;
+  // wheel diameter (meters)
+  public static final double WHEEL_DIAMETER_METERS = 0.1016;
   // drive gear ratio
   // TODO: check gear ratio (currently set to 'standard')
   public static final double DRIVE_GEAR_RATIO = 1/8.14;
 
   // constants for calculating rotation vector
-  private static final double ROTATION_Y = Math.sin(Math.atan2(ROBOT_LENGTH, ROBOT_WIDTH));
-  private static final double ROTATION_X = Math.cos(Math.atan2(ROBOT_LENGTH, ROBOT_WIDTH));
+  private static final double ROTATION_Y = Math.sin(Math.atan2(ROBOT_LENGTH_METERS, ROBOT_WIDTH_METERS));
+  private static final double ROTATION_X = Math.cos(Math.atan2(ROBOT_LENGTH_METERS, ROBOT_WIDTH_METERS));
 
   private static final double DRIVE_NEUTRAL_BAND = 0.001; // TODO: tune drive motor neutral band
 
@@ -139,6 +130,25 @@ public class Swerve extends SubsystemBase {
   // pid values
   private static final double AZIMUTH_kP = 0.3;
   private static final double AZIMUTH_kD = 0.2;
+  // calculated via JVN calculator
+  // TODO check these closed-loop drive PID values
+  private static final double DRIVE_kP = 0.044057;
+  private static final double DRIVE_kF = 0.028998;
+
+  // TODO check if these max speed values are reasonable and practical
+  /** maximum strafe speed (meters per second) */
+  private static final double MAX_LINEAR_SPEED = 4.5;
+  /** maximum rotation speed (radians per second) */
+  private static final double MAX_ROTATION_SPEED = Math.PI * 0.5;
+
+  /** WPILib swerve kinematics */
+  private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(new Translation2d(ROBOT_LENGTH_METERS/2, -ROBOT_WIDTH_METERS/2), new Translation2d(ROBOT_LENGTH_METERS/2, ROBOT_WIDTH_METERS/2), new Translation2d(-ROBOT_LENGTH_METERS/2, -ROBOT_WIDTH_METERS/2), new Translation2d(-ROBOT_LENGTH_METERS/2, ROBOT_WIDTH_METERS/2));
+
+  private ChassisSpeeds forwardKinematics = new ChassisSpeeds();
+
+  private ChassisSpeeds kinematicCommand = new ChassisSpeeds();
+
+  private SwerveModuleState[] modules = new SwerveModuleState[3];
 
   /** Creates a new ExampleSubsystem. */
   public Swerve(Pigeon2 pigeon) {
@@ -152,6 +162,8 @@ public class Swerve extends SubsystemBase {
     FL_Drive.configNeutralDeadband(DRIVE_NEUTRAL_BAND);
     FL_Drive.configOpenloopRamp(DRIVE_RAMP_RATE);
     FL_Drive.configStatorCurrentLimit(DRIVE_CURRENT_LIMIT);
+    FL_Drive.config_kP(0, DRIVE_kP);
+    FL_Drive.config_kF(0, DRIVE_kF);
     
     FR_Drive.configFactoryDefault();
     FR_Drive.setInverted(TalonFXInvertType.CounterClockwise);
@@ -159,6 +171,8 @@ public class Swerve extends SubsystemBase {
     FR_Drive.configNeutralDeadband(DRIVE_NEUTRAL_BAND);
     FR_Drive.configOpenloopRamp(DRIVE_RAMP_RATE);
     FR_Drive.configStatorCurrentLimit(DRIVE_CURRENT_LIMIT);
+    BR_Drive.config_kP(0, DRIVE_kP);
+    BR_Drive.config_kF(0, DRIVE_kF);
 
     BL_Drive.configFactoryDefault();
     BL_Drive.setInverted(TalonFXInvertType.CounterClockwise);
@@ -166,6 +180,8 @@ public class Swerve extends SubsystemBase {
     BL_Drive.configNeutralDeadband(DRIVE_NEUTRAL_BAND);
     BL_Drive.configOpenloopRamp(DRIVE_RAMP_RATE);
     BL_Drive.configStatorCurrentLimit(DRIVE_CURRENT_LIMIT);
+    BR_Drive.config_kP(0, DRIVE_kP);
+    BR_Drive.config_kF(0, DRIVE_kF);
 
     BR_Drive.configFactoryDefault();
     BR_Drive.setInverted(TalonFXInvertType.CounterClockwise);
@@ -173,6 +189,8 @@ public class Swerve extends SubsystemBase {
     BR_Drive.configNeutralDeadband(DRIVE_NEUTRAL_BAND);
     BR_Drive.configOpenloopRamp(DRIVE_RAMP_RATE);
     BR_Drive.configStatorCurrentLimit(DRIVE_CURRENT_LIMIT);
+    BR_Drive.config_kP(0, DRIVE_kP);
+    BR_Drive.config_kF(0, DRIVE_kF);
 
     // config CANcoders
     FL_Position.configFactoryDefault();
@@ -243,21 +261,21 @@ public class Swerve extends SubsystemBase {
     BL_Actual_Position = ((BL_Azimuth.getSelectedSensorPosition() / 4096) * 360) % 360;
     BR_Actual_Position = ((BR_Azimuth.getSelectedSensorPosition() / 4096) * 360) % 360;
 
-    // 'actual' read encoder speeds per module (feet per second)
-    FL_Actual_Speed = (FL_Drive.getSelectedSensorVelocity() / 4096) * 10 * DRIVE_GEAR_RATIO * Math.PI * (WHEEL_DIAMETER / 12.0);
-    FR_Actual_Speed = (FR_Drive.getSelectedSensorVelocity() / 4096) * 10 * DRIVE_GEAR_RATIO * Math.PI * (WHEEL_DIAMETER / 12.0);
-    BL_Actual_Speed = (BL_Drive.getSelectedSensorVelocity() / 4096) * 10 * DRIVE_GEAR_RATIO * Math.PI * (WHEEL_DIAMETER / 12.0);
-    BR_Actual_Speed = (BR_Drive.getSelectedSensorVelocity() / 4096) * 10 * DRIVE_GEAR_RATIO * Math.PI * (WHEEL_DIAMETER / 12.0);
+    // 'actual' read encoder speeds per module (meters per second)
+    FL_Actual_Speed = (FL_Drive.getSelectedSensorVelocity() / 4096) * 10 * DRIVE_GEAR_RATIO * Math.PI * WHEEL_DIAMETER_METERS;
+    FR_Actual_Speed = (FR_Drive.getSelectedSensorVelocity() / 4096) * 10 * DRIVE_GEAR_RATIO * Math.PI * WHEEL_DIAMETER_METERS;
+    BL_Actual_Speed = (BL_Drive.getSelectedSensorVelocity() / 4096) * 10 * DRIVE_GEAR_RATIO * Math.PI * WHEEL_DIAMETER_METERS;
+    BR_Actual_Speed = (BR_Drive.getSelectedSensorVelocity() / 4096) * 10 * DRIVE_GEAR_RATIO * Math.PI * WHEEL_DIAMETER_METERS;
 
     // dashboard data
     Telemetry.setValue("drivetrain/Modules/FL/Azimuth/Target", FL_Target);
     Telemetry.setValue("drivetrain/Modules/FR/Azimuth/Target", FR_Target);
     Telemetry.setValue("drivetrain/Modules/BL/Azimuth/Target", BL_Target);
     Telemetry.setValue("drivetrain/Modules/BR/Azimuth/Target", BR_Target);
-    Telemetry.setValue("drivetrain/Modules/FL/Drive/Power", FL_Power);
-    Telemetry.setValue("drivetrain/Modules/FR/Drive/Power", FR_Power);
-    Telemetry.setValue("drivetrain/Modules/BL/Drive/Power", BL_Power);
-    Telemetry.setValue("drivetrain/Modules/BR/Drive/Power", BR_Power);
+    Telemetry.setValue("drivetrain/Modules/FL/Drive/Power", FL_Speed);
+    Telemetry.setValue("drivetrain/Modules/FR/Drive/Power", FR_Speed);
+    Telemetry.setValue("drivetrain/Modules/BL/Drive/Power", BL_Speed);
+    Telemetry.setValue("drivetrain/Modules/BR/Drive/Power", BR_Speed);
     Telemetry.setValue("drivetrain/Modules/FL/Azimuth/Actual_Position", FL_Actual_Position);
     Telemetry.setValue("drivetrain/Modules/FR/Azimuth/Actual_Position", FR_Actual_Position);
     Telemetry.setValue("drivetrain/Modules/BL/Azimuth/Actual_Position", BL_Actual_Position);
@@ -315,18 +333,18 @@ public class Swerve extends SubsystemBase {
     _leftTranslation = ( (Math.cos(Math.toRadians(FL_Actual_Position)) * FL_Actual_Speed ) + (Math.cos(Math.toRadians(BL_Actual_Position)) * BL_Actual_Speed) ) / 2.0;
     _rightTranslation = ( (Math.cos(Math.toRadians(FR_Actual_Position)) * FL_Actual_Speed ) + (Math.cos(Math.toRadians(BR_Actual_Position)) * BL_Actual_Speed) ) / 2.0;
 
-    _rotationTranslation = ( ( (_frontTranslation - _backTranslation) / ROBOT_LENGTH ) + ( (_rightTranslation - _leftTranslation) / ROBOT_WIDTH ) ) / 2.0;
-    _forwardTranslation = ( (_rotationTranslation * (ROBOT_LENGTH/2.0) + _backTranslation) + (-_rotationTranslation * (ROBOT_LENGTH/2.0) + _frontTranslation) ) / 2.0;
-    _sidewaysTranslation = ( (_rotationTranslation * (ROBOT_WIDTH/2) + _rightTranslation) + (-_rotationTranslation * (ROBOT_WIDTH/2.0) + _leftTranslation) ) / 2.0;
+    _rotationTranslation = ( ( (_frontTranslation - _backTranslation) / ROBOT_LENGTH_METERS ) + ( (_rightTranslation - _leftTranslation) / ROBOT_WIDTH_METERS ) ) / 2.0;
+    _forwardTranslation = ( (_rotationTranslation * (ROBOT_LENGTH_METERS/2.0) + _backTranslation) + (-_rotationTranslation * (ROBOT_LENGTH_METERS/2.0) + _frontTranslation) ) / 2.0;
+    _sidewaysTranslation = ( (_rotationTranslation * (ROBOT_WIDTH_METERS/2) + _rightTranslation) + (-_rotationTranslation * (ROBOT_WIDTH_METERS/2.0) + _leftTranslation) ) / 2.0;
 
     _fieldForwardTranslation = ( _forwardTranslation * Math.cos(Math.toRadians(gyro.getYaw())) + _sidewaysTranslation * Math.sin(Math.toRadians(gyro.getYaw())));
     _fieldSidewaysTranslation =  ( _sidewaysTranslation * Math.cos(Math.toRadians(gyro.getYaw())) - _forwardTranslation * Math.sin(Math.toRadians(gyro.getYaw())));
 
-    Telemetry.setValue("drivetrain/kinematics/robot/forward", _forwardTranslation);
-    Telemetry.setValue("drivetrain/kinematics/robot/rightward", _sidewaysTranslation);
-    Telemetry.setValue("drivetrain/kinematics/clockwise_speed", _rotationTranslation);
-    Telemetry.setValue("drivetrain/kinematics/field/DS_away", _fieldForwardTranslation);
-    Telemetry.setValue("drivetrain/kinematics/field/DS_right", _fieldSidewaysTranslation);
+    Telemetry.setValue("drivetrain/kinematics/homemade/robot/forward", _forwardTranslation);
+    Telemetry.setValue("drivetrain/kinematics/homemade/robot/rightward", _sidewaysTranslation);
+    Telemetry.setValue("drivetrain/kinematics/homemade/clockwise_speed", _rotationTranslation);
+    Telemetry.setValue("drivetrain/kinematics/homemade/field/DS_away", _fieldForwardTranslation);
+    Telemetry.setValue("drivetrain/kinematics/homemade/field/DS_right", _fieldSidewaysTranslation);
 
     _timeStep = System.currentTimeMillis() - _lastRunTime;
 
@@ -335,86 +353,62 @@ public class Swerve extends SubsystemBase {
     _fieldForwardPosition += _fieldForwardTranslation * (_timeStep / 1000.0);
     _fieldSidewaysPosition += _fieldSidewaysTranslation * (_timeStep / 1000.0);
 
-    Telemetry.setValue("drivetrain/odometry/robot/forward", _robotForwardPosition);
-    Telemetry.setValue("drivetrain/odometry/robot/rightward", _robotSidewaysPosition);
-    Telemetry.setValue("drivetrain/odometry/field/DS_away", _fieldForwardPosition);
-    Telemetry.setValue("drivetrain/odometry/field/DS_right", _fieldSidewaysPosition);
+    Telemetry.setValue("drivetrain/odometry/homemade/robot/forward", _robotForwardPosition);
+    Telemetry.setValue("drivetrain/odometry/homemade/robot/rightward", _robotSidewaysPosition);
+    Telemetry.setValue("drivetrain/odometry/homemade/field/DS_away", _fieldForwardPosition);
+    Telemetry.setValue("drivetrain/odometry/homemade/field/DS_right", _fieldSidewaysPosition);
 
     _lastRunTime = System.currentTimeMillis();
+
+    forwardKinematics = kinematics.toChassisSpeeds(new SwerveModuleState(FL_Actual_Speed, new Rotation2d(Math.toRadians(FL_Actual_Position))), new SwerveModuleState(FR_Actual_Speed, new Rotation2d(Math.toRadians(FR_Actual_Position))), new SwerveModuleState(BL_Actual_Speed, new Rotation2d(Math.toRadians(BL_Actual_Position))), new SwerveModuleState(BR_Actual_Speed, new Rotation2d(Math.toRadians(BR_Actual_Position))) );
+
+    Telemetry.setValue("drivetrain/kinematics/official/robot/forward", forwardKinematics.vxMetersPerSecond);
+    Telemetry.setValue("drivetrain/kinematics/official/robot/rightward", -forwardKinematics.vyMetersPerSecond);
+    Telemetry.setValue("drivetrain/kinematics/official/clockwise_speed", -Math.toDegrees(forwardKinematics.omegaRadiansPerSecond));
+    Telemetry.setValue("drivetrain/kinematics/official/field/DS_away", ( forwardKinematics.vxMetersPerSecond * Math.cos(Math.toRadians(gyro.getYaw())) - forwardKinematics.vyMetersPerSecond * Math.sin(Math.toRadians(gyro.getYaw()))));
+    Telemetry.setValue("drivetrain/kinematics/official/field/DS_right", ( -forwardKinematics.vyMetersPerSecond * Math.cos(Math.toRadians(gyro.getYaw())) - forwardKinematics.vxMetersPerSecond * Math.sin(Math.toRadians(gyro.getYaw()))));
+
+    Telemetry.setValue("drivetrain/odometry/official/robot/forward", 0);
+    Telemetry.setValue("drivetrain/odometry/official/robot/rightward", 0);
+    Telemetry.setValue("drivetrain/odometry/official/field/DS_away", 0);
+    Telemetry.setValue("drivetrain/odometry/official/field/DS_right", 0);
   }
 
   @Override
   public void simulationPeriodic() {}
 
-  public void drive(double LX, double LY, double RX) {
+  public void joystickDrive(double LX, double LY, double RX) {
 
     robotYaw = gyro.getYaw();
 
-    // field orient
-    if (!isRobotOriented) {
-      LY = LY * Math.cos(Math.toRadians(robotYaw)) + LX * Math.sin(Math.toRadians(robotYaw));
-      LX = LX * Math.cos(Math.toRadians(robotYaw)) - ((LY/Math.cos(Math.toRadians(robotYaw))) - LX * Math.sin(Math.toRadians(robotYaw))) * Math.sin(Math.toRadians(robotYaw));
-    }
-
-    // vector addition of strafe component (LX & LY) and rotation component
-    // (ROTATION_X * RX)
-    FL_X = LX + (ROTATION_X * RX);
-    FL_Y = LY + (ROTATION_Y * RX);
-
-    // pythagorean theorum to find magnitude of resultant vector
-    FL_Power = Math.hypot(FL_X, FL_Y);
-    // arctan to find angle of resulatant vector, then correct for quadrant
-    FL_Target = (Math.toDegrees(Math.atan2(FL_Y, FL_X)) + (LY < 0 ? 360 : 0)) % 360;
-
-    // vector addition of strafe component (LX & LY) and rotation component
-    // (ROTATION_X * RX)
-    FR_X = LX + (ROTATION_X * RX);
-    FR_Y = LY - (ROTATION_Y * RX);
-
-    // pythagorean theorum to find magnitude of resultant vector
-    FR_Power = Math.hypot(FR_X, FR_Y);
-    // arctan to find angle of resulatant vector, then correct for quadrant
-    FR_Target = (Math.toDegrees(Math.atan2(FR_Y, FR_X)) + (LY < 0 ? 360 : 0)) % 360;
-
-    // vector addition of strafe component (LX & LY) and rotation component
-    // (ROTATION_X * RX)
-    BL_X = LX - (ROTATION_X * RX);
-    BL_Y = LY + (ROTATION_Y * RX);
-
-    // pythagorean theorum to find magnitude of resultant vector
-    BL_Power = Math.hypot(BL_X, BL_Y);
-    // arctan to find angle of resulatant vector, then correct for quadrant
-    BL_Target = (Math.toDegrees(Math.atan2(BL_Y, BL_X)) + (LY < 0 ? 360 : 0)) % 360;
-
-    // vector addition of strafe component (LX & LY) and rotation component
-    // (ROTATION_X * RX)
-    BR_X = LX - (ROTATION_X * RX);
-    BR_Y = LY - (ROTATION_Y * RX);
-
-    // pythagorean theorum to find magnitude of resultant vector
-    BR_Power = Math.hypot(BR_X, BR_Y);
-    // arctan to find angle of resulatant vector, then correct for quadrant
-    BR_Target = (Math.toDegrees(Math.atan2(BR_Y, BR_X)) + (LY < 0 ? 360 : 0)) % 360;
-
-    // if one or more wheels has a target speed of > 100%, put all wheel speeds over
-    // the max so that the
-    // fastest wheel goes full speed and the others preserve their ratios of speed
-    // to acheive smooth movement
-    _speedRegulator = Math.max(Math.max(FL_Power, FR_Power), Math.max(BL_Power, BR_Power));
-    if (_speedRegulator > 1.0) {
-      FL_Power /= _speedRegulator;
-      FR_Power /= _speedRegulator;
-      BL_Power /= _speedRegulator;
-      BR_Power /= _speedRegulator;
-    }
+    // WPILib swerve command
+    kinematicCommand = new ChassisSpeeds(LY * MAX_LINEAR_SPEED, LX * MAX_LINEAR_SPEED, RX * MAX_ROTATION_SPEED);
+    if ( !isRobotOriented ) kinematicCommand = ChassisSpeeds.fromFieldRelativeSpeeds(LY * MAX_LINEAR_SPEED, LX * MAX_LINEAR_SPEED, RX * MAX_ROTATION_SPEED, Rotation2d.fromDegrees(robotYaw));
+    
+    modules = kinematics.toSwerveModuleStates(kinematicCommand);
 
     // if joystick is idle, lock wheels to X formation to avoid pushing
     if (LX == 0 && LY == 0 && RX == 0) {
-      FL_Target = (Math.toDegrees(Math.atan2( ROTATION_Y, -ROTATION_X))) % 360;
-      FR_Target = (Math.toDegrees(Math.atan2( ROTATION_Y,  ROTATION_X))) % 360;
-      BL_Target = (Math.toDegrees(Math.atan2(-ROTATION_Y, -ROTATION_X))) % 360;
-      BR_Target = (Math.toDegrees(Math.atan2(-ROTATION_Y,  ROTATION_X))) % 360;
+      modules[0].angle = new Rotation2d((Math.atan2( ROTATION_Y, -ROTATION_X)) % 360);
+      modules[1].angle = new Rotation2d((Math.atan2( ROTATION_Y,  ROTATION_X)) % 360);
+      modules[2].angle = new Rotation2d((Math.atan2(-ROTATION_Y, -ROTATION_X)) % 360);
+      modules[3].angle = new Rotation2d((Math.atan2(-ROTATION_Y,  ROTATION_X)) % 360);
     }
+
+    driveFromModuleStates(modules);
+  }
+
+  public void driveFromModuleStates ( SwerveModuleState[] modules ) {
+    SwerveDriveKinematics.desaturateWheelSpeeds(modules, MAX_LINEAR_SPEED);
+
+    FL_Target = modules[0].speedMetersPerSecond;
+    FR_Target = modules[1].speedMetersPerSecond;
+    BL_Target = modules[2].speedMetersPerSecond;
+    BR_Target = modules[3].speedMetersPerSecond;
+    FL_Speed = modules[0].angle.getDegrees();
+    FR_Speed = modules[1].angle.getDegrees();
+    BL_Speed = modules[2].angle.getDegrees();
+    BR_Speed = modules[3].angle.getDegrees();
 
     // find the shortest path to an equivalent position to prevent unneccesary full rotations
     _Path_1 = Math.abs(FL_Target - FL_Actual_Position);
@@ -457,10 +451,10 @@ public class Swerve extends SubsystemBase {
     BR_Azimuth.set(ControlMode.Position, ((BR_Target + (BR_Actual_Position - (BR_Actual_Position % 360))) / 360) * 4096);
 
     // pass wheel speeds to motor controllers
-    FL_Drive.set(ControlMode.PercentOutput, FL_Power);
-    FR_Drive.set(ControlMode.PercentOutput, FR_Power);
-    BL_Drive.set(ControlMode.PercentOutput, BL_Power);
-    BR_Drive.set(ControlMode.PercentOutput, BR_Power);
+    FL_Drive.set(ControlMode.Velocity, (FL_Speed/(Math.PI * WHEEL_DIAMETER_METERS)*4096)/10);
+    FR_Drive.set(ControlMode.Velocity, (FR_Speed/(Math.PI * WHEEL_DIAMETER_METERS)*4096)/10);
+    BL_Drive.set(ControlMode.Velocity, (BL_Speed/(Math.PI * WHEEL_DIAMETER_METERS)*4096)/10);
+    BR_Drive.set(ControlMode.Velocity, (BR_Speed/(Math.PI * WHEEL_DIAMETER_METERS)*4096)/10);
   }
 
   /** Sets the gyroscope's current heading to 0 */
