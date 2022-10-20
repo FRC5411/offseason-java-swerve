@@ -158,99 +158,22 @@ public class Swerve extends SubsystemBase {
     gyro = pigeon;
 
     // config drive motors
-    FL_Drive.configFactoryDefault();
-    FL_Drive.setInverted(TalonFXInvertType.CounterClockwise);
-    FL_Drive.setNeutralMode(NeutralMode.Brake);
-    FL_Drive.configNeutralDeadband(DRIVE_NEUTRAL_BAND);
-    FL_Drive.configOpenloopRamp(DRIVE_RAMP_RATE);
-    FL_Drive.configStatorCurrentLimit(DRIVE_CURRENT_LIMIT);
-    FL_Drive.config_kP(0, DRIVE_kP);
-    FL_Drive.config_kF(0, DRIVE_kF);
-    
-    FR_Drive.configFactoryDefault();
-    FR_Drive.setInverted(TalonFXInvertType.CounterClockwise);
-    FR_Drive.setNeutralMode(NeutralMode.Brake);
-    FR_Drive.configNeutralDeadband(DRIVE_NEUTRAL_BAND);
-    FR_Drive.configOpenloopRamp(DRIVE_RAMP_RATE);
-    FR_Drive.configStatorCurrentLimit(DRIVE_CURRENT_LIMIT);
-    BR_Drive.config_kP(0, DRIVE_kP);
-    BR_Drive.config_kF(0, DRIVE_kF);
-
-    BL_Drive.configFactoryDefault();
-    BL_Drive.setInverted(TalonFXInvertType.CounterClockwise);
-    BL_Drive.setNeutralMode(NeutralMode.Brake);
-    BL_Drive.configNeutralDeadband(DRIVE_NEUTRAL_BAND);
-    BL_Drive.configOpenloopRamp(DRIVE_RAMP_RATE);
-    BL_Drive.configStatorCurrentLimit(DRIVE_CURRENT_LIMIT);
-    BR_Drive.config_kP(0, DRIVE_kP);
-    BR_Drive.config_kF(0, DRIVE_kF);
-
-    BR_Drive.configFactoryDefault();
-    BR_Drive.setInverted(TalonFXInvertType.CounterClockwise);
-    BR_Drive.setNeutralMode(NeutralMode.Brake);
-    BR_Drive.configNeutralDeadband(DRIVE_NEUTRAL_BAND);
-    BR_Drive.configOpenloopRamp(DRIVE_RAMP_RATE);
-    BR_Drive.configStatorCurrentLimit(DRIVE_CURRENT_LIMIT);
-    BR_Drive.config_kP(0, DRIVE_kP);
-    BR_Drive.config_kF(0, DRIVE_kF);
+    configDrive(FL_Drive);
+    configDrive(FR_Drive);
+    configDrive(BL_Drive);
+    configDrive(BR_Drive);
 
     // config CANcoders
-    FL_Position.configFactoryDefault();
-    FL_Position.configMagnetOffset(FL_ECODER_OFFSET);
-    FL_Position.configSensorInitializationStrategy(SensorInitializationStrategy.BootToAbsolutePosition);
-    FL_Position.setPositionToAbsolute();
-
-    FR_Position.configFactoryDefault();
-    FR_Position.configMagnetOffset(FR_ECODER_OFFSET);
-    FR_Position.configSensorInitializationStrategy(SensorInitializationStrategy.BootToAbsolutePosition);
-    FR_Position.setPositionToAbsolute();
-
-    BL_Position.configFactoryDefault();
-    BL_Position.configMagnetOffset(BL_ECODER_OFFSET);
-    BL_Position.configSensorInitializationStrategy(SensorInitializationStrategy.BootToAbsolutePosition);
-    BL_Position.setPositionToAbsolute();
-
-    BR_Position.configFactoryDefault();
-    BR_Position.configMagnetOffset(BR_ECODER_OFFSET);
-    BR_Position.configSensorInitializationStrategy(SensorInitializationStrategy.BootToAbsolutePosition);
-    BR_Position.setPositionToAbsolute();
+    configPosition(FL_Position, FL_ECODER_OFFSET);
+    configPosition(FR_Position, FR_ECODER_OFFSET);
+    configPosition(BL_Position, BL_ECODER_OFFSET);
+    configPosition(BR_Position, BR_ECODER_OFFSET);
 
     // config azimuth (steering) motors
-    FL_Azimuth.configFactoryDefault();
-    FL_Azimuth.setInverted(TalonFXInvertType.CounterClockwise);
-    FL_Azimuth.setNeutralMode(NeutralMode.Brake);
-    FL_Azimuth.configRemoteFeedbackFilter(FL_Position, 0);
-    FL_Azimuth.configSelectedFeedbackSensor(FeedbackDevice.RemoteSensor0);
-    FL_Azimuth.setSelectedSensorPosition(FL_Position.getAbsolutePosition());
-    FL_Azimuth.config_kP(0, AZIMUTH_kP);
-    FL_Azimuth.config_kD(0, AZIMUTH_kD);
-
-    FR_Azimuth.configFactoryDefault();
-    FR_Azimuth.setInverted(TalonFXInvertType.CounterClockwise);
-    FR_Azimuth.setNeutralMode(NeutralMode.Brake);
-    FR_Azimuth.configRemoteFeedbackFilter(FR_Position, 0);
-    FR_Azimuth.configSelectedFeedbackSensor(FeedbackDevice.RemoteSensor0);
-    FR_Azimuth.setSelectedSensorPosition(FR_Position.getAbsolutePosition());
-    FR_Azimuth.config_kP(0, AZIMUTH_kP);
-    FR_Azimuth.config_kD(0, AZIMUTH_kD);
-
-    BL_Azimuth.configFactoryDefault();
-    BL_Azimuth.setInverted(TalonFXInvertType.CounterClockwise);
-    BL_Azimuth.setNeutralMode(NeutralMode.Brake);
-    BL_Azimuth.configRemoteFeedbackFilter(BL_Position, 0);
-    BL_Azimuth.configSelectedFeedbackSensor(FeedbackDevice.RemoteSensor0);
-    BL_Azimuth.setSelectedSensorPosition(BL_Position.getAbsolutePosition());
-    BL_Azimuth.config_kP(0, AZIMUTH_kP);
-    BL_Azimuth.config_kD(0, AZIMUTH_kD);
-
-    BR_Azimuth.configFactoryDefault();
-    BR_Azimuth.setInverted(TalonFXInvertType.CounterClockwise);
-    BR_Azimuth.setNeutralMode(NeutralMode.Brake);
-    BR_Azimuth.configRemoteFeedbackFilter(BR_Position, 0);
-    BR_Azimuth.configSelectedFeedbackSensor(FeedbackDevice.RemoteSensor0);
-    BR_Azimuth.setSelectedSensorPosition(BR_Position.getAbsolutePosition());
-    BR_Azimuth.config_kP(0, AZIMUTH_kP);
-    BR_Azimuth.config_kD(0, AZIMUTH_kD);
+    configAzimuth(FL_Azimuth);
+    configAzimuth(FR_Azimuth);
+    configAzimuth(BL_Azimuth);
+    configAzimuth(BR_Azimuth);
   }
 
   @Override
@@ -468,5 +391,37 @@ public class Swerve extends SubsystemBase {
   /** Sets the robot's orientation to robot (true) or field (false) */
   public void setRobotOriented(boolean _isRobotOriented) {
     isRobotOriented = _isRobotOriented;
+  }
+
+  /** runs the configuration methods to apply the config variables */
+  private void configDrive (TalonFX motor) {
+    motor.configFactoryDefault();
+    motor.setInverted(TalonFXInvertType.CounterClockwise);
+    motor.setNeutralMode(NeutralMode.Brake);
+    motor.configNeutralDeadband(DRIVE_NEUTRAL_BAND);
+    motor.configOpenloopRamp(DRIVE_RAMP_RATE);
+    motor.configStatorCurrentLimit(DRIVE_CURRENT_LIMIT);
+    motor.config_kP(0, DRIVE_kP);
+    motor.config_kF(0, DRIVE_kF);
+  }
+
+  /** runs the configuration methods to apply the config variables */
+  private void configAzimuth (TalonFX motor) {
+    motor.configFactoryDefault();
+    motor.setInverted(TalonFXInvertType.CounterClockwise);
+    motor.setNeutralMode(NeutralMode.Brake);
+    motor.configRemoteFeedbackFilter(FL_Position, 0);
+    motor.configSelectedFeedbackSensor(FeedbackDevice.RemoteSensor0);
+    motor.setSelectedSensorPosition(FL_Position.getAbsolutePosition());
+    motor.config_kP(0, AZIMUTH_kP);
+    motor.config_kD(0, AZIMUTH_kD);
+  }
+  
+  /** runs the configuration methods to apply the config variables */
+  private void configPosition (CANCoder encoder, double offset) {
+    encoder.configFactoryDefault();
+    encoder.configMagnetOffset(offset);
+    encoder.configSensorInitializationStrategy(SensorInitializationStrategy.BootToAbsolutePosition);
+    encoder.setPositionToAbsolute();
   }
 }
