@@ -113,10 +113,6 @@ public class Swerve extends SubsystemBase {
   // constants for calculating rotation vector
   private static final double ROTATION_Y = Math.sin(Math.atan2(ROBOT_LENGTH_METERS, ROBOT_WIDTH_METERS));
   private static final double ROTATION_X = Math.cos(Math.atan2(ROBOT_LENGTH_METERS, ROBOT_WIDTH_METERS));
-
-  private static final double DRIVE_NEUTRAL_BAND = 0.001; // TODO: tune drive motor neutral band
-
-  private static final double DRIVE_RAMP_RATE = 0; // TODO: tune drive motor ramp rate
   
   private static final StatorCurrentLimitConfiguration DRIVE_CURRENT_LIMIT = new StatorCurrentLimitConfiguration(); // TODO: tune drive motor stator current limit
 
@@ -403,8 +399,6 @@ public class Swerve extends SubsystemBase {
     motor.configFactoryDefault();
     motor.setInverted(TalonFXInvertType.CounterClockwise);
     motor.setNeutralMode(NeutralMode.Brake);
-    motor.configNeutralDeadband(DRIVE_NEUTRAL_BAND);
-    motor.configOpenloopRamp(DRIVE_RAMP_RATE);
     motor.configStatorCurrentLimit(DRIVE_CURRENT_LIMIT);
     motor.config_kP(0, DRIVE_kP);
     motor.config_kF(0, DRIVE_kF);
