@@ -31,6 +31,7 @@ import com.ctre.phoenix.sensors.Pigeon2;
 import com.ctre.phoenix.sensors.SensorInitializationStrategy;
 import com.pathplanner.lib.PathPlannerTrajectory;
 import com.pathplanner.lib.commands.PPSwerveControllerCommand;
+import com.pathplanner.lib.server.PathPlannerServer;
 
 import frc.lib.Telemetry;
 
@@ -83,29 +84,6 @@ public class Swerve extends SubsystemBase {
   private double FR_Actual_Speed = 0.0;
   private double BL_Actual_Speed = 0.0;
   private double BR_Actual_Speed = 0.0;
-
-  // temp variables used to calculate the chassis movement
-  /** B */ private double _frontTranslation = 0;
-  /** A */ private double _backTranslation = 0;
-  /** D */ private double _leftTranslation = 0;
-  /** C */ private double _rightTranslation = 0;
-  /** ROT */ private double _rotationTranslation = 0;
-  /** FWD */ private double _forwardTranslation = 0;
-  /** STR */ private double _sidewaysTranslation = 0;
-
-  private double _fieldForwardTranslation = 0;
-  private double _fieldSidewaysTranslation = 0;
-
-  private long _lastRunTime = System.currentTimeMillis();
-  private long _timeStep = 0;
-
-  private double _robotForwardPosition = 0;
-  private double _robotSidewaysPosition = 0;
-  private double _fieldForwardPosition = 0;
-  private double _fieldSidewaysPosition = 0;
-
-  // the read yaw value from the NavX
-  private double robotYaw = 0.0;
 
   // robot oriented / field oriented swerve drive toggle
   private boolean isRobotOriented = true;
@@ -200,6 +178,8 @@ public class Swerve extends SubsystemBase {
     configAzimuth(FR_Azimuth, FR_Position);
     configAzimuth(BL_Azimuth, BL_Position);
     configAzimuth(BR_Azimuth, BR_Position);
+
+    PathPlannerServer.startServer(6969); // 5811 = port number. adjust this according to your needs
   }
 
   @Override
@@ -263,38 +243,6 @@ public class Swerve extends SubsystemBase {
     Telemetry.setValue("drivetrain/isRobotOriented", isRobotOriented);
     Telemetry.setValue("drivetrain/yaw", gyro.getYaw());
 
-    _rightTranslation = ( (Math.sin(Math.toRadians(FL_Actual_Position)) * FL_Actual_Speed ) + (Math.sin(Math.toRadians(FR_Actual_Position)) * FR_Actual_Speed) ) / 2.0;
-    _leftTranslation = ( (Math.sin(Math.toRadians(BL_Actual_Position)) * BL_Actual_Speed ) + (Math.sin(Math.toRadians(BR_Actual_Position)) * BR_Actual_Speed) ) / 2.0;
-    _backTranslation = ( (Math.cos(Math.toRadians(FL_Actual_Position)) * FL_Actual_Speed ) + (Math.cos(Math.toRadians(BL_Actual_Position)) * BL_Actual_Speed) ) / 2.0;
-    _frontTranslation = ( (Math.cos(Math.toRadians(FR_Actual_Position)) * FL_Actual_Speed ) + (Math.cos(Math.toRadians(BR_Actual_Position)) * BL_Actual_Speed) ) / 2.0;
-
-    _rotationTranslation = ( ( (_frontTranslation - _backTranslation) / ROBOT_LENGTH_METERS ) + ( (_rightTranslation - _leftTranslation) / ROBOT_WIDTH_METERS ) ) / 2.0;
-    _forwardTranslation = ( (_rotationTranslation * (ROBOT_LENGTH_METERS/2.0) + _backTranslation) + (-_rotationTranslation * (ROBOT_LENGTH_METERS/2.0) + _frontTranslation) ) / 2.0;
-    _sidewaysTranslation = ( (_rotationTranslation * (ROBOT_WIDTH_METERS/2) + _rightTranslation) + (-_rotationTranslation * (ROBOT_WIDTH_METERS/2.0) + _leftTranslation) ) / 2.0;
-
-    _fieldForwardTranslation = ( _forwardTranslation * Math.cos(Math.toRadians(gyro.getYaw())) + _sidewaysTranslation * Math.sin(Math.toRadians(gyro.getYaw())));
-    _fieldSidewaysTranslation =  ( _sidewaysTranslation * Math.cos(Math.toRadians(gyro.getYaw())) - _forwardTranslation * Math.sin(Math.toRadians(gyro.getYaw())));
-
-    Telemetry.setValue("drivetrain/kinematics/homemade/robot/forward", _forwardTranslation);
-    Telemetry.setValue("drivetrain/kinematics/homemade/robot/rightward", -_sidewaysTranslation);
-    Telemetry.setValue("drivetrain/kinematics/homemade/clockwise_speed", -_rotationTranslation);
-    Telemetry.setValue("drivetrain/kinematics/homemade/field/DS_away", _fieldForwardTranslation);
-    Telemetry.setValue("drivetrain/kinematics/homemade/field/DS_right", -_fieldSidewaysTranslation);
-
-    _timeStep = System.currentTimeMillis() - _lastRunTime;
-
-    _robotForwardPosition += _forwardTranslation * (_timeStep / 1000.0);
-    _robotSidewaysPosition += _sidewaysTranslation * (_timeStep / 1000.0);
-    _fieldForwardPosition += _fieldForwardTranslation * (_timeStep / 1000.0);
-    _fieldSidewaysPosition += _fieldSidewaysTranslation * (_timeStep / 1000.0);
-
-    Telemetry.setValue("drivetrain/odometry/homemade/robot/forward", _robotForwardPosition);
-    Telemetry.setValue("drivetrain/odometry/homemade/robot/rightward", -_robotSidewaysPosition);
-    Telemetry.setValue("drivetrain/odometry/homemade/field/DS_away", _fieldForwardPosition);
-    Telemetry.setValue("drivetrain/odometry/homemade/field/DS_right", -_fieldSidewaysPosition);
-
-    _lastRunTime = System.currentTimeMillis();
-
     forwardKinematics = kinematics.toChassisSpeeds(new SwerveModuleState(FL_Actual_Speed, new Rotation2d(Math.toRadians(FL_Actual_Position))), new SwerveModuleState(FR_Actual_Speed, new Rotation2d(Math.toRadians(FR_Actual_Position))), new SwerveModuleState(BL_Actual_Speed, new Rotation2d(Math.toRadians(BL_Actual_Position))), new SwerveModuleState(BR_Actual_Speed, new Rotation2d(Math.toRadians(BR_Actual_Position))) );
 
     Telemetry.setValue("drivetrain/kinematics/official/robot/forward", forwardKinematics.vxMetersPerSecond);
@@ -318,11 +266,9 @@ public class Swerve extends SubsystemBase {
 
   public void joystickDrive(double LX, double LY, double RX) {
 
-    robotYaw = gyro.getYaw();
-
     // WPILib swerve command
     kinematicCommand = new ChassisSpeeds(LY * MAX_LINEAR_SPEED, -LX * MAX_LINEAR_SPEED, -RX * MAX_ROTATION_SPEED);
-    if ( !isRobotOriented ) kinematicCommand = ChassisSpeeds.fromFieldRelativeSpeeds(LY * MAX_LINEAR_SPEED, -LX * MAX_LINEAR_SPEED, -RX * MAX_ROTATION_SPEED, Rotation2d.fromDegrees(robotYaw));
+    if ( !isRobotOriented ) kinematicCommand = ChassisSpeeds.fromFieldRelativeSpeeds(LY * MAX_LINEAR_SPEED, -LX * MAX_LINEAR_SPEED, -RX * MAX_ROTATION_SPEED, Rotation2d.fromDegrees(gyro.getYaw()));
     
     modules = kinematics.toSwerveModuleStates(kinematicCommand);
 
@@ -447,6 +393,9 @@ public class Swerve extends SubsystemBase {
 
   // Assuming this method is part of a drivetrain subsystem that provides the necessary methods
 public Command followTrajectoryCommand(PathPlannerTrajectory traj) {
+
+  odometryOfficial.resetPosition(traj.getInitialHolonomicPose(), new Rotation2d(Math.toRadians(gyro.getYaw())));
+
   // This is just an example event map. It would be better to have a constant, global event map
   // in your code that will be used by all path following commands.
   HashMap<String, Command> eventMap = new HashMap<>();
