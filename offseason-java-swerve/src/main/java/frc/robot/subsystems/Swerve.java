@@ -314,14 +314,14 @@ public class Swerve extends SubsystemBase {
   public void driveFromModuleStates ( SwerveModuleState[] modules ) {
     SwerveDriveKinematics.desaturateWheelSpeeds(modules, MAX_LINEAR_SPEED);
 
-    FL_Target = modules[0].speedMetersPerSecond;
-    FR_Target = modules[1].speedMetersPerSecond;
-    BL_Target = modules[2].speedMetersPerSecond;
-    BR_Target = modules[3].speedMetersPerSecond;
-    FL_Speed = modules[0].angle.getDegrees();
-    FR_Speed = modules[1].angle.getDegrees();
-    BL_Speed = modules[2].angle.getDegrees();
-    BR_Speed = modules[3].angle.getDegrees();
+    FL_Target = modules[0].angle.getDegrees() % 360;
+    FR_Target = modules[1].angle.getDegrees() % 360;
+    BL_Target = modules[2].angle.getDegrees() % 360;
+    BR_Target = modules[3].angle.getDegrees() % 360;
+    FL_Speed = modules[0].speedMetersPerSecond;
+    FR_Speed = modules[1].speedMetersPerSecond;
+    BL_Speed = modules[2].speedMetersPerSecond;
+    BR_Speed = modules[3].speedMetersPerSecond;
 
     // find the shortest path to an equivalent position to prevent unneccesary full rotations
     _Path_1 = Math.abs(FL_Target - FL_Actual_Position);
