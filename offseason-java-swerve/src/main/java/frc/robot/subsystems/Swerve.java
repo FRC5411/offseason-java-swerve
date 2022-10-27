@@ -192,10 +192,10 @@ public class Swerve extends SubsystemBase {
     BR_Actual_Position = ((BR_Azimuth.getSelectedSensorPosition() / 4096) * 360) % 360;
 
     // 'actual' read encoder speeds per module (meters per second)
-    FL_Actual_Speed = (FL_Drive.getSelectedSensorVelocity() / 4096) * 10 * DRIVE_GEAR_RATIO * Math.PI * WHEEL_DIAMETER_METERS;
-    FR_Actual_Speed = (FR_Drive.getSelectedSensorVelocity() / 4096) * 10 * DRIVE_GEAR_RATIO * Math.PI * WHEEL_DIAMETER_METERS;
-    BL_Actual_Speed = (BL_Drive.getSelectedSensorVelocity() / 4096) * 10 * DRIVE_GEAR_RATIO * Math.PI * WHEEL_DIAMETER_METERS;
-    BR_Actual_Speed = (BR_Drive.getSelectedSensorVelocity() / 4096) * 10 * DRIVE_GEAR_RATIO * Math.PI * WHEEL_DIAMETER_METERS;
+    FL_Actual_Speed = (FL_Drive.getSelectedSensorVelocity() / 4096) * 10 / DRIVE_GEAR_RATIO * Math.PI * WHEEL_DIAMETER_METERS;
+    FR_Actual_Speed = (FR_Drive.getSelectedSensorVelocity() / 4096) * 10 / DRIVE_GEAR_RATIO * Math.PI * WHEEL_DIAMETER_METERS;
+    BL_Actual_Speed = (BL_Drive.getSelectedSensorVelocity() / 4096) * 10 / DRIVE_GEAR_RATIO * Math.PI * WHEEL_DIAMETER_METERS;
+    BR_Actual_Speed = (BR_Drive.getSelectedSensorVelocity() / 4096) * 10 / DRIVE_GEAR_RATIO * Math.PI * WHEEL_DIAMETER_METERS;
 
     // dashboard data
     Telemetry.setValue("drivetrain/Modules/FL/Azimuth/Target", FL_Target);
