@@ -155,7 +155,7 @@ public class Swerve extends SubsystemBase {
 
   private SwerveModuleState[] modules = new SwerveModuleState[3];
 
-  private short[] accelerometerData = new short[2];
+  private short[] accelerometerData = new short[3];
 
   /** Creates a new ExampleSubsystem. */
   public Swerve(Pigeon2 pigeon) {
