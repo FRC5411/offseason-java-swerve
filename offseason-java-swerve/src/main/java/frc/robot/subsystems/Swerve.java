@@ -109,7 +109,7 @@ public class Swerve extends SubsystemBase {
   public static final double WHEEL_DIAMETER_METERS = 0.1016;
   // drive gear ratio
   // TODO: check gear ratio (currently set to 'standard')
-  public static final double DRIVE_GEAR_RATIO = 1/8.14;
+  public static final double DRIVE_GEAR_RATIO = 6.12;
 
   // constants for calculating rotation vector
   private static final double ROTATION_Y = Math.sin(Math.atan2(ROBOT_LENGTH_METERS, ROBOT_WIDTH_METERS));
@@ -406,11 +406,11 @@ public class Swerve extends SubsystemBase {
   }
 
   /** runs the configuration methods to apply the config variables */
-  private void configAzimuth (TalonFX motor) {
+  private void configAzimuth (TalonFX motor, CANCoder position) {
     motor.configFactoryDefault();
     motor.setInverted(TalonFXInvertType.CounterClockwise);
     motor.setNeutralMode(NeutralMode.Brake);
-    motor.configRemoteFeedbackFilter(FL_Position, 0);
+    motor.configRemoteFeedbackFilter(position, 0);
     motor.configSelectedFeedbackSensor(FeedbackDevice.RemoteSensor0);
     motor.setSelectedSensorPosition(FL_Position.getAbsolutePosition());
     motor.config_kP(0, AZIMUTH_kP);
