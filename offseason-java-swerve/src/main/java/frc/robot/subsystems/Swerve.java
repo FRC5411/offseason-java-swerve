@@ -364,10 +364,10 @@ public class Swerve extends SubsystemBase {
     BR_Azimuth.set(ControlMode.Position, ((BR_Target + (BR_Actual_Position - (BR_Actual_Position % 360))) / 360) * 4096);
 
     // pass wheel speeds to motor controllers
-    FL_Drive.set(ControlMode.Velocity, (FL_Speed/(Math.PI * WHEEL_DIAMETER_METERS)*4096)/10);
-    FR_Drive.set(ControlMode.Velocity, (FR_Speed/(Math.PI * WHEEL_DIAMETER_METERS)*4096)/10);
-    BL_Drive.set(ControlMode.Velocity, (BL_Speed/(Math.PI * WHEEL_DIAMETER_METERS)*4096)/10);
-    BR_Drive.set(ControlMode.Velocity, (BR_Speed/(Math.PI * WHEEL_DIAMETER_METERS)*4096)/10);
+    FL_Drive.set(ControlMode.Velocity, (FL_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER_METERS)*4096)/10);
+    FR_Drive.set(ControlMode.Velocity, (FR_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER_METERS)*4096)/10);
+    BL_Drive.set(ControlMode.Velocity, (BL_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER_METERS)*4096)/10);
+    BR_Drive.set(ControlMode.Velocity, (BR_Speed*DRIVE_GEAR_RATIO/(Math.PI * WHEEL_DIAMETER_METERS)*4096)/10);
   }
 
   /** Sets the gyroscope's current heading to 0 */
