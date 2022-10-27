@@ -113,16 +113,14 @@ public class Swerve extends SubsystemBase {
   private static final StatorCurrentLimitConfiguration DRIVE_CURRENT_LIMIT = new StatorCurrentLimitConfiguration(); // TODO tune drive motor stator current limit
 
   // encoder offsets (degrees)
-  // TODO remeasure zero positions
   private static final double FL_ECODER_OFFSET = -313.682;
   private static final double FR_ECODER_OFFSET = -166.553;
   private static final double BL_ECODER_OFFSET = -246.006;
   private static final double BR_ECODER_OFFSET = -204.258;
 
   // pid values
-  // TODO retune azimuth PID
-  private static final double AZIMUTH_kP = 0.3;
-  private static final double AZIMUTH_kD = 0.2;
+  private static final double AZIMUTH_kP = 0.6; 
+  private static final double AZIMUTH_kD = 12;
 
   // calculated via JVN calculator
   private static final double DRIVE_kP = 0.044057;
