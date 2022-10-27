@@ -7,8 +7,6 @@ package frc.robot;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import frc.robot.commands.DriveCommand;
-import frc.robot.commands.ExampleCommand;
-import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.Swerve;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -31,7 +29,6 @@ public class RobotContainer {
   Pigeon2 pigeon = new Pigeon2(4); 
 
   // The robot's subsystems and commands are defined here...
-  private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
   private final Swerve m_swerve = new Swerve(pigeon);
 
   private final Command m_autoCommand = m_swerve.followTrajectoryCommand(PathPlanner.loadPath("New Path", new PathConstraints(4, 3)));
