@@ -117,6 +117,7 @@ public class Swerve extends SubsystemBase {
   private static final StatorCurrentLimitConfiguration DRIVE_CURRENT_LIMIT = new StatorCurrentLimitConfiguration(); // TODO: tune drive motor stator current limit
 
   // encoder offsets (degrees)
+  // TODO remeasure zero positions
   private static final double FL_ECODER_OFFSET = -313.682;
   private static final double FR_ECODER_OFFSET = -166.553;
   private static final double BL_ECODER_OFFSET = -246.006;
@@ -238,10 +239,10 @@ public class Swerve extends SubsystemBase {
     Telemetry.setValue("drivetrain/isRobotOriented", isRobotOriented);
     Telemetry.setValue("drivetrain/yaw", gyro.getYaw());
 
-    _frontTranslation = ( (Math.sin(Math.toRadians(FL_Actual_Position)) * FL_Actual_Speed ) + (Math.sin(Math.toRadians(FR_Actual_Position)) * FR_Actual_Speed) ) / 2.0;
-    _backTranslation = ( (Math.sin(Math.toRadians(BL_Actual_Position)) * BL_Actual_Speed ) + (Math.sin(Math.toRadians(BR_Actual_Position)) * BR_Actual_Speed) ) / 2.0;
-    _leftTranslation = ( (Math.cos(Math.toRadians(FL_Actual_Position)) * FL_Actual_Speed ) + (Math.cos(Math.toRadians(BL_Actual_Position)) * BL_Actual_Speed) ) / 2.0;
-    _rightTranslation = ( (Math.cos(Math.toRadians(FR_Actual_Position)) * FL_Actual_Speed ) + (Math.cos(Math.toRadians(BR_Actual_Position)) * BL_Actual_Speed) ) / 2.0;
+    _rightTranslation = ( (Math.sin(Math.toRadians(FL_Actual_Position)) * FL_Actual_Speed ) + (Math.sin(Math.toRadians(FR_Actual_Position)) * FR_Actual_Speed) ) / 2.0;
+    _leftTranslation = ( (Math.sin(Math.toRadians(BL_Actual_Position)) * BL_Actual_Speed ) + (Math.sin(Math.toRadians(BR_Actual_Position)) * BR_Actual_Speed) ) / 2.0;
+    _backTranslation = ( (Math.cos(Math.toRadians(FL_Actual_Position)) * FL_Actual_Speed ) + (Math.cos(Math.toRadians(BL_Actual_Position)) * BL_Actual_Speed) ) / 2.0;
+    _frontTranslation = ( (Math.cos(Math.toRadians(FR_Actual_Position)) * FL_Actual_Speed ) + (Math.cos(Math.toRadians(BR_Actual_Position)) * BL_Actual_Speed) ) / 2.0;
 
     _rotationTranslation = ( ( (_frontTranslation - _backTranslation) / ROBOT_LENGTH_METERS ) + ( (_rightTranslation - _leftTranslation) / ROBOT_WIDTH_METERS ) ) / 2.0;
     _forwardTranslation = ( (_rotationTranslation * (ROBOT_LENGTH_METERS/2.0) + _backTranslation) + (-_rotationTranslation * (ROBOT_LENGTH_METERS/2.0) + _frontTranslation) ) / 2.0;
