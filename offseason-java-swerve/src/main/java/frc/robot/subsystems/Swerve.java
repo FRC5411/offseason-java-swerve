@@ -175,10 +175,10 @@ public class Swerve extends SubsystemBase {
     configPosition(BR_Position, BR_ECODER_OFFSET);
 
     // config azimuth (steering) motors
-    configAzimuth(FL_Azimuth);
-    configAzimuth(FR_Azimuth);
-    configAzimuth(BL_Azimuth);
-    configAzimuth(BR_Azimuth);
+    configAzimuth(FL_Azimuth, FL_Position);
+    configAzimuth(FR_Azimuth, FR_Position);
+    configAzimuth(BL_Azimuth, BL_Position);
+    configAzimuth(BR_Azimuth, BR_Position);
   }
 
   @Override
