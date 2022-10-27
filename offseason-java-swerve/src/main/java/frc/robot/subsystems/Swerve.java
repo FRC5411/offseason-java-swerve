@@ -122,7 +122,7 @@ public class Swerve extends SubsystemBase {
   private static final double BR_ECODER_OFFSET = -204.258;
 
   // pid values
-  private static final double AZIMUTH_kP = 0.6; 
+  private static final double AZIMUTH_kP = 0.4;
   private static final double AZIMUTH_kD = 12;
 
   // calculated via JVN calculator
