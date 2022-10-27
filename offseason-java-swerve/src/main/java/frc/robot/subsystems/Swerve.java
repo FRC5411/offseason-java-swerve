@@ -71,11 +71,6 @@ public class Swerve extends SubsystemBase {
   private double BL_Actual_Speed = 0.0;
   private double BR_Actual_Speed = 0.0;
 
-  // temp variables used to determine the most efficient path for each module
-  private double _Path_1 = 0.0;
-  private double _Path_2 = 0.0;
-  private double _Path_3 = 0.0;
-
   // temp variables used to calculate the chassis movement
   /** B */ private double _frontTranslation = 0;
   /** A */ private double _backTranslation = 0;
@@ -327,37 +322,10 @@ public class Swerve extends SubsystemBase {
     BR_Speed = modules[3].speedMetersPerSecond;
 
     // find the shortest path to an equivalent position to prevent unneccesary full rotations
-    _Path_1 = Math.abs(FL_Target - FL_Actual_Position);
-    _Path_2 = Math.abs((FL_Target + 360) - FL_Actual_Position);
-    _Path_3 = Math.abs((FL_Target - 360) - FL_Actual_Position);
-    if (Math.min(Math.min(_Path_1, _Path_2), _Path_3) == _Path_2)
-      FL_Target += 360;
-    if (Math.min(Math.min(_Path_1, _Path_2), _Path_3) == _Path_3)
-      FL_Target -= 360;
-    
-    _Path_1 = Math.abs(FR_Target - FR_Actual_Position);
-    _Path_2 = Math.abs((FR_Target + 360) - FR_Actual_Position);
-    _Path_3 = Math.abs((FR_Target - 360) - FR_Actual_Position);
-    if (Math.min(Math.min(_Path_1, _Path_2), _Path_3) == _Path_2)
-      FR_Target += 360;
-    if (Math.min(Math.min(_Path_1, _Path_2), _Path_3) == _Path_3)
-      FR_Target -= 360;
-
-    _Path_1 = Math.abs(BL_Target - BL_Actual_Position);
-    _Path_2 = Math.abs((BL_Target + 360) - BL_Actual_Position);
-    _Path_3 = Math.abs((BL_Target - 360) - BL_Actual_Position);
-    if (Math.min(Math.min(_Path_1, _Path_2), _Path_3) == _Path_2)
-      BL_Target += 360;
-    if (Math.min(Math.min(_Path_1, _Path_2), _Path_3) == _Path_3)
-      BL_Target -= 360;
-
-    _Path_1 = Math.abs(BR_Target - BR_Actual_Position);
-    _Path_2 = Math.abs((BR_Target + 360) - BR_Actual_Position);
-    _Path_3 = Math.abs((BR_Target - 360) - BR_Actual_Position);
-    if (Math.min(Math.min(_Path_1, _Path_2), _Path_3) == _Path_2)
-      BR_Target += 360;
-    if (Math.min(Math.min(_Path_1, _Path_2), _Path_3) == _Path_3)
-      BR_Target -= 360;
+    FL_Target = optimizeAzimuthPath(FL_Target, FL_Actual_Position);
+    FR_Target = optimizeAzimuthPath(FR_Target, FR_Actual_Position);
+    BL_Target = optimizeAzimuthPath(BL_Target, BL_Actual_Position);
+    BR_Target = optimizeAzimuthPath(BR_Target, BR_Actual_Position);
 
     // correct the target positions so that they are close to the current position
     // then convert to sensor units and pass target positions to motor controllers
@@ -391,12 +359,16 @@ public class Swerve extends SubsystemBase {
     return isRobotOriented;
   }
 
-  /** Sets the robot's orientation to robot (true) or field (false) */
+  /** Sets the robot's orientation to robot (true) or field (false) 
+   * @param _isRobotOriented - false if the robot should move with the gyro
+  */
   public void setRobotOriented(boolean _isRobotOriented) {
     isRobotOriented = _isRobotOriented;
   }
 
-  /** runs the configuration methods to apply the config variables */
+  /** runs the configuration methods to apply the config variables 
+   * @param motor - the device to configure
+  */
   private void configDrive (TalonFX motor) {
     motor.configFactoryDefault();
     motor.setInverted(TalonFXInvertType.CounterClockwise);
@@ -406,7 +378,10 @@ public class Swerve extends SubsystemBase {
     motor.config_kF(0, DRIVE_kF);
   }
 
-  /** runs the configuration methods to apply the config variables */
+  /** runs the configuration methods to apply the config variables 
+   * @param motor - the device to configure
+   * @param position - the CANCoder associated with the module
+  */
   private void configAzimuth (TalonFX motor, CANCoder position) {
     motor.configFactoryDefault();
     motor.setInverted(TalonFXInvertType.CounterClockwise);
@@ -418,11 +393,27 @@ public class Swerve extends SubsystemBase {
     motor.config_kD(0, AZIMUTH_kD);
   }
   
-  /** runs the configuration methods to apply the config variables */
+  /** runs the configuration methods to apply the config variables 
+   * @param encoder - the device to configure
+   * @param offset - the measured constant offset in degrees
+  */
   private void configPosition (CANCoder encoder, double offset) {
     encoder.configFactoryDefault();
     encoder.configMagnetOffset(offset);
     encoder.configSensorInitializationStrategy(SensorInitializationStrategy.BootToAbsolutePosition);
     encoder.setPositionToAbsolute();
+  }
+
+  /** finds the closest equivalent position to the target 
+   * @param target - the target direction of the module (deg)
+   * @param actual - the current direction of the module (deg)
+   * @return the corrected target position of the motor
+  */
+  private double optimizeAzimuthPath (double target, double actual) {
+    if (Math.min(Math.min(Math.abs(target - FL_Actual_Position), Math.abs((target + 360) - actual)), Math.abs((target - 360) - actual)) == Math.abs((target + 360) - actual))
+      target += 360;
+    if (Math.min(Math.min(Math.abs(target - FL_Actual_Position), Math.abs((target + 360) - actual)), Math.abs((target - 360) - actual)) == Math.abs((target - 360) - actual))
+      target -= 360;
+    return target;
   }
 }
