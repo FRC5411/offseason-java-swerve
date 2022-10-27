@@ -142,7 +142,12 @@ public class Swerve extends SubsystemBase {
   private static final double MAX_ROTATION_SPEED = Math.PI * 0.5;
 
   /** WPILib swerve kinematics */
-  private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(new Translation2d(ROBOT_LENGTH_METERS/2, -ROBOT_WIDTH_METERS/2), new Translation2d(ROBOT_LENGTH_METERS/2, ROBOT_WIDTH_METERS/2), new Translation2d(-ROBOT_LENGTH_METERS/2, -ROBOT_WIDTH_METERS/2), new Translation2d(-ROBOT_LENGTH_METERS/2, ROBOT_WIDTH_METERS/2));
+  private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(
+    new Translation2d(ROBOT_LENGTH_METERS/2, ROBOT_WIDTH_METERS/2), 
+    new Translation2d(ROBOT_LENGTH_METERS/2, -ROBOT_WIDTH_METERS/2), 
+    new Translation2d(-ROBOT_LENGTH_METERS/2, ROBOT_WIDTH_METERS/2), 
+    new Translation2d(-ROBOT_LENGTH_METERS/2, -ROBOT_WIDTH_METERS/2)
+  );
 
   private ChassisSpeeds forwardKinematics = new ChassisSpeeds();
 
@@ -295,17 +300,17 @@ public class Swerve extends SubsystemBase {
     robotYaw = gyro.getYaw();
 
     // WPILib swerve command
-    kinematicCommand = new ChassisSpeeds(LY * MAX_LINEAR_SPEED, LX * MAX_LINEAR_SPEED, RX * MAX_ROTATION_SPEED);
-    if ( !isRobotOriented ) kinematicCommand = ChassisSpeeds.fromFieldRelativeSpeeds(LY * MAX_LINEAR_SPEED, LX * MAX_LINEAR_SPEED, RX * MAX_ROTATION_SPEED, Rotation2d.fromDegrees(robotYaw));
+    kinematicCommand = new ChassisSpeeds(LY * MAX_LINEAR_SPEED, -LX * MAX_LINEAR_SPEED, -RX * MAX_ROTATION_SPEED);
+    if ( !isRobotOriented ) kinematicCommand = ChassisSpeeds.fromFieldRelativeSpeeds(LY * MAX_LINEAR_SPEED, -LX * MAX_LINEAR_SPEED, -RX * MAX_ROTATION_SPEED, Rotation2d.fromDegrees(robotYaw));
     
     modules = kinematics.toSwerveModuleStates(kinematicCommand);
 
     // if joystick is idle, lock wheels to X formation to avoid pushing
     if (LX == 0 && LY == 0 && RX == 0) {
-      modules[0].angle = new Rotation2d((Math.atan2( ROTATION_Y, -ROTATION_X)) % 360);
-      modules[1].angle = new Rotation2d((Math.atan2( ROTATION_Y,  ROTATION_X)) % 360);
-      modules[2].angle = new Rotation2d((Math.atan2(-ROTATION_Y, -ROTATION_X)) % 360);
-      modules[3].angle = new Rotation2d((Math.atan2(-ROTATION_Y,  ROTATION_X)) % 360);
+      modules[0].angle = new Rotation2d((Math.atan2( ROTATION_Y,  ROTATION_X)) % 360);
+      modules[1].angle = new Rotation2d((Math.atan2( ROTATION_Y, -ROTATION_X)) % 360);
+      modules[2].angle = new Rotation2d((Math.atan2(-ROTATION_Y,  ROTATION_X)) % 360);
+      modules[3].angle = new Rotation2d((Math.atan2(-ROTATION_Y, -ROTATION_X)) % 360);
     }
 
     driveFromModuleStates(modules);
