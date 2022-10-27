@@ -108,13 +108,14 @@ public class Swerve extends SubsystemBase {
   // wheel diameter (meters)
   public static final double WHEEL_DIAMETER_METERS = 0.1016;
   // drive gear ratio
+  // TODO get actual gear ratio (this one is close as determined experimentally)
   public static final double DRIVE_GEAR_RATIO = 6.12;
 
   // constants for calculating rotation vector
   private static final double ROTATION_Y = Math.sin(Math.atan2(ROBOT_LENGTH_METERS, ROBOT_WIDTH_METERS));
   private static final double ROTATION_X = Math.cos(Math.atan2(ROBOT_LENGTH_METERS, ROBOT_WIDTH_METERS));
   
-  private static final StatorCurrentLimitConfiguration DRIVE_CURRENT_LIMIT = new StatorCurrentLimitConfiguration(); // TODO: tune drive motor stator current limit
+  private static final StatorCurrentLimitConfiguration DRIVE_CURRENT_LIMIT = new StatorCurrentLimitConfiguration(); // TODO tune drive motor stator current limit
 
   // encoder offsets (degrees)
   // TODO remeasure zero positions
@@ -124,15 +125,15 @@ public class Swerve extends SubsystemBase {
   private static final double BR_ECODER_OFFSET = -204.258;
 
   // pid values
+  // TODO retune azimuth PID
   private static final double AZIMUTH_kP = 0.3;
   private static final double AZIMUTH_kD = 0.2;
 
   // calculated via JVN calculator
-  // TODO check these closed-loop drive PID values
   private static final double DRIVE_kP = 0.044057;
   private static final double DRIVE_kF = 0.028998;
 
-  // TODO check if these max speed values are reasonable and practical
+  // TODO find actual max speeds
   /** maximum strafe speed (meters per second) */
   private static final double MAX_LINEAR_SPEED = 5.4;
   /** maximum rotation speed (radians per second) */
