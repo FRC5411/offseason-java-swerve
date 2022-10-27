@@ -4,6 +4,10 @@
 
 package frc.robot.subsystems;
 
+import edu.wpi.first.math.MatBuilder;
+import edu.wpi.first.math.Nat;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -103,8 +107,7 @@ public class Swerve extends SubsystemBase {
   // wheel diameter (meters)
   public static final double WHEEL_DIAMETER_METERS = 0.1016;
   // drive gear ratio
-  // TODO get actual gear ratio (this one is close as determined experimentally)
-  public static final double DRIVE_GEAR_RATIO = 6.12;
+  public static final double DRIVE_GEAR_RATIO = 6.75;
 
   // constants for calculating rotation vector
   private static final double ROTATION_Y = Math.sin(Math.atan2(ROBOT_LENGTH_METERS, ROBOT_WIDTH_METERS));
@@ -148,6 +151,15 @@ public class Swerve extends SubsystemBase {
 
   private short[] accelerometerData = new short[3];
 
+  private SwerveDrivePoseEstimator odometryOfficial = new SwerveDrivePoseEstimator(
+    new Rotation2d(Math.toRadians(gyro.getYaw())), 
+    new Pose2d(), 
+    kinematics, 
+    new MatBuilder<>(Nat.N3(), Nat.N1()).fill(0.02, 0.02, 0.01), 
+    new MatBuilder<>(Nat.N1(), Nat.N1()).fill(0.02), 
+    new MatBuilder<>(Nat.N3(), Nat.N1()).fill(0.1, 0.1, 0.01)
+  );
+
   /** Creates a new ExampleSubsystem. */
   public Swerve(Pigeon2 pigeon) {
 
@@ -183,10 +195,10 @@ public class Swerve extends SubsystemBase {
     BR_Actual_Position = ((BR_Azimuth.getSelectedSensorPosition() / 4096) * 360) % 360;
 
     // 'actual' read encoder speeds per module (meters per second)
-    FL_Actual_Speed = (FL_Drive.getSelectedSensorVelocity() / 4096) * 10 / DRIVE_GEAR_RATIO * Math.PI * WHEEL_DIAMETER_METERS;
-    FR_Actual_Speed = (FR_Drive.getSelectedSensorVelocity() / 4096) * 10 / DRIVE_GEAR_RATIO * Math.PI * WHEEL_DIAMETER_METERS;
-    BL_Actual_Speed = (BL_Drive.getSelectedSensorVelocity() / 4096) * 10 / DRIVE_GEAR_RATIO * Math.PI * WHEEL_DIAMETER_METERS;
-    BR_Actual_Speed = (BR_Drive.getSelectedSensorVelocity() / 4096) * 10 / DRIVE_GEAR_RATIO * Math.PI * WHEEL_DIAMETER_METERS;
+    FL_Actual_Speed = 2.0*(((FL_Drive.getSelectedSensorVelocity() / 4096) * 10) / DRIVE_GEAR_RATIO) * Math.PI * WHEEL_DIAMETER_METERS;
+    FR_Actual_Speed = 2.0*(((FR_Drive.getSelectedSensorVelocity() / 4096) * 10) / DRIVE_GEAR_RATIO) * Math.PI * WHEEL_DIAMETER_METERS;
+    BL_Actual_Speed = 2.0*(((BL_Drive.getSelectedSensorVelocity() / 4096) * 10) / DRIVE_GEAR_RATIO) * Math.PI * WHEEL_DIAMETER_METERS;
+    BR_Actual_Speed = 2.0*(((BR_Drive.getSelectedSensorVelocity() / 4096) * 10) / DRIVE_GEAR_RATIO) * Math.PI * WHEEL_DIAMETER_METERS;
 
     // dashboard data
     Telemetry.setValue("drivetrain/Modules/FL/Azimuth/Target", FL_Target);
@@ -246,10 +258,10 @@ public class Swerve extends SubsystemBase {
     _fieldSidewaysTranslation =  ( _sidewaysTranslation * Math.cos(Math.toRadians(gyro.getYaw())) - _forwardTranslation * Math.sin(Math.toRadians(gyro.getYaw())));
 
     Telemetry.setValue("drivetrain/kinematics/homemade/robot/forward", _forwardTranslation);
-    Telemetry.setValue("drivetrain/kinematics/homemade/robot/rightward", _sidewaysTranslation);
-    Telemetry.setValue("drivetrain/kinematics/homemade/clockwise_speed", _rotationTranslation);
+    Telemetry.setValue("drivetrain/kinematics/homemade/robot/rightward", -_sidewaysTranslation);
+    Telemetry.setValue("drivetrain/kinematics/homemade/clockwise_speed", -_rotationTranslation);
     Telemetry.setValue("drivetrain/kinematics/homemade/field/DS_away", _fieldForwardTranslation);
-    Telemetry.setValue("drivetrain/kinematics/homemade/field/DS_right", _fieldSidewaysTranslation);
+    Telemetry.setValue("drivetrain/kinematics/homemade/field/DS_right", -_fieldSidewaysTranslation);
 
     _timeStep = System.currentTimeMillis() - _lastRunTime;
 
@@ -259,9 +271,9 @@ public class Swerve extends SubsystemBase {
     _fieldSidewaysPosition += _fieldSidewaysTranslation * (_timeStep / 1000.0);
 
     Telemetry.setValue("drivetrain/odometry/homemade/robot/forward", _robotForwardPosition);
-    Telemetry.setValue("drivetrain/odometry/homemade/robot/rightward", _robotSidewaysPosition);
+    Telemetry.setValue("drivetrain/odometry/homemade/robot/rightward", -_robotSidewaysPosition);
     Telemetry.setValue("drivetrain/odometry/homemade/field/DS_away", _fieldForwardPosition);
-    Telemetry.setValue("drivetrain/odometry/homemade/field/DS_right", _fieldSidewaysPosition);
+    Telemetry.setValue("drivetrain/odometry/homemade/field/DS_right", -_fieldSidewaysPosition);
 
     _lastRunTime = System.currentTimeMillis();
 
@@ -269,14 +281,14 @@ public class Swerve extends SubsystemBase {
 
     Telemetry.setValue("drivetrain/kinematics/official/robot/forward", forwardKinematics.vxMetersPerSecond);
     Telemetry.setValue("drivetrain/kinematics/official/robot/rightward", -forwardKinematics.vyMetersPerSecond);
-    Telemetry.setValue("drivetrain/kinematics/official/clockwise_speed", -Math.toDegrees(forwardKinematics.omegaRadiansPerSecond));
+    Telemetry.setValue("drivetrain/kinematics/official/clockwise_speed", Math.toDegrees(forwardKinematics.omegaRadiansPerSecond));
     Telemetry.setValue("drivetrain/kinematics/official/field/DS_away", ( forwardKinematics.vxMetersPerSecond * Math.cos(Math.toRadians(gyro.getYaw())) - forwardKinematics.vyMetersPerSecond * Math.sin(Math.toRadians(gyro.getYaw()))));
     Telemetry.setValue("drivetrain/kinematics/official/field/DS_right", ( -forwardKinematics.vyMetersPerSecond * Math.cos(Math.toRadians(gyro.getYaw())) - forwardKinematics.vxMetersPerSecond * Math.sin(Math.toRadians(gyro.getYaw()))));
 
-    Telemetry.setValue("drivetrain/odometry/official/robot/forward", 0);
-    Telemetry.setValue("drivetrain/odometry/official/robot/rightward", 0);
-    Telemetry.setValue("drivetrain/odometry/official/field/DS_away", 0);
-    Telemetry.setValue("drivetrain/odometry/official/field/DS_right", 0);
+    odometryOfficial.update(new Rotation2d(Math.toRadians(gyro.getYaw())), new SwerveModuleState(FL_Actual_Speed, new Rotation2d(Math.toRadians(FL_Actual_Position))), new SwerveModuleState(FR_Actual_Speed, new Rotation2d(Math.toRadians(FR_Actual_Position))), new SwerveModuleState(BL_Actual_Speed, new Rotation2d(Math.toRadians(BL_Actual_Position))), new SwerveModuleState(BR_Actual_Speed, new Rotation2d(Math.toRadians(BR_Actual_Position))) );
+
+    Telemetry.setValue("drivetrain/odometry/official/field/DS_away", odometryOfficial.getEstimatedPosition().getY());
+    Telemetry.setValue("drivetrain/odometry/official/field/DS_right", -odometryOfficial.getEstimatedPosition().getX());
 
     gyro.getBiasedAccelerometer(accelerometerData);
     Telemetry.setValue("drivetrain/kinematics/gyro/robot/forward_acceleration", (double) accelerometerData[1]);
