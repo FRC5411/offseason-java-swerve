@@ -108,7 +108,6 @@ public class Swerve extends SubsystemBase {
   // wheel diameter (meters)
   public static final double WHEEL_DIAMETER_METERS = 0.1016;
   // drive gear ratio
-  // TODO: check gear ratio (currently set to 'standard')
   public static final double DRIVE_GEAR_RATIO = 6.12;
 
   // constants for calculating rotation vector
@@ -130,6 +129,7 @@ public class Swerve extends SubsystemBase {
   // pid values
   private static final double AZIMUTH_kP = 0.3;
   private static final double AZIMUTH_kD = 0.2;
+
   // calculated via JVN calculator
   // TODO check these closed-loop drive PID values
   private static final double DRIVE_kP = 0.044057;
