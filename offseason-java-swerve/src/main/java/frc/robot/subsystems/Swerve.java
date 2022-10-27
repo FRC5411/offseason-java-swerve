@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 
 import edu.wpi.first.math.MatBuilder;
 import edu.wpi.first.math.Nat;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -13,7 +14,12 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import java.util.HashMap;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
@@ -23,6 +29,9 @@ import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.sensors.CANCoder;
 import com.ctre.phoenix.sensors.Pigeon2;
 import com.ctre.phoenix.sensors.SensorInitializationStrategy;
+import com.pathplanner.lib.PathPlannerTrajectory;
+import com.pathplanner.lib.commands.PPSwerveControllerCommand;
+
 import frc.lib.Telemetry;
 
 /** 
@@ -152,13 +161,22 @@ public class Swerve extends SubsystemBase {
   private short[] accelerometerData = new short[3];
 
   private SwerveDrivePoseEstimator odometryOfficial = new SwerveDrivePoseEstimator(
-    new Rotation2d(Math.toRadians(gyro.getYaw())), 
+    new Rotation2d(), 
     new Pose2d(), 
     kinematics, 
     new MatBuilder<>(Nat.N3(), Nat.N1()).fill(0.02, 0.02, 0.01), 
     new MatBuilder<>(Nat.N1(), Nat.N1()).fill(0.02), 
     new MatBuilder<>(Nat.N3(), Nat.N1()).fill(0.1, 0.1, 0.01)
   );
+  private Pose2d _robotPose = new Pose2d();
+
+  private Consumer<SwerveModuleState[]> pathFollower = modules -> {
+    driveFromModuleStates( modules);
+  };
+
+  private Supplier<Pose2d> pathState = () -> {
+    return odometryOfficial.getEstimatedPosition();
+  };
 
   /** Creates a new ExampleSubsystem. */
   public Swerve(Pigeon2 pigeon) {
@@ -285,10 +303,10 @@ public class Swerve extends SubsystemBase {
     Telemetry.setValue("drivetrain/kinematics/official/field/DS_away", ( forwardKinematics.vxMetersPerSecond * Math.cos(Math.toRadians(gyro.getYaw())) - forwardKinematics.vyMetersPerSecond * Math.sin(Math.toRadians(gyro.getYaw()))));
     Telemetry.setValue("drivetrain/kinematics/official/field/DS_right", ( -forwardKinematics.vyMetersPerSecond * Math.cos(Math.toRadians(gyro.getYaw())) - forwardKinematics.vxMetersPerSecond * Math.sin(Math.toRadians(gyro.getYaw()))));
 
-    odometryOfficial.update(new Rotation2d(Math.toRadians(gyro.getYaw())), new SwerveModuleState(FL_Actual_Speed, new Rotation2d(Math.toRadians(FL_Actual_Position))), new SwerveModuleState(FR_Actual_Speed, new Rotation2d(Math.toRadians(FR_Actual_Position))), new SwerveModuleState(BL_Actual_Speed, new Rotation2d(Math.toRadians(BL_Actual_Position))), new SwerveModuleState(BR_Actual_Speed, new Rotation2d(Math.toRadians(BR_Actual_Position))) );
+    _robotPose = odometryOfficial.update(new Rotation2d(Math.toRadians(gyro.getYaw())), new SwerveModuleState(FL_Actual_Speed, new Rotation2d(Math.toRadians(FL_Actual_Position))), new SwerveModuleState(FR_Actual_Speed, new Rotation2d(Math.toRadians(FR_Actual_Position))), new SwerveModuleState(BL_Actual_Speed, new Rotation2d(Math.toRadians(BL_Actual_Position))), new SwerveModuleState(BR_Actual_Speed, new Rotation2d(Math.toRadians(BR_Actual_Position))) );
 
-    Telemetry.setValue("drivetrain/odometry/official/field/DS_away", odometryOfficial.getEstimatedPosition().getY());
-    Telemetry.setValue("drivetrain/odometry/official/field/DS_right", -odometryOfficial.getEstimatedPosition().getX());
+    Telemetry.setValue("drivetrain/odometry/official/field/DS_away", -_robotPose.getX());
+    Telemetry.setValue("drivetrain/odometry/official/field/DS_right", _robotPose.getY());
 
     gyro.getBiasedAccelerometer(accelerometerData);
     Telemetry.setValue("drivetrain/kinematics/gyro/robot/forward_acceleration", (double) accelerometerData[1]);
@@ -425,5 +443,25 @@ public class Swerve extends SubsystemBase {
     if (Math.min(Math.min(Math.abs(target - FL_Actual_Position), Math.abs((target + 360) - actual)), Math.abs((target - 360) - actual)) == Math.abs((target - 360) - actual))
       target -= 360;
     return target;
+  }
+
+  // Assuming this method is part of a drivetrain subsystem that provides the necessary methods
+public Command followTrajectoryCommand(PathPlannerTrajectory traj) {
+  // This is just an example event map. It would be better to have a constant, global event map
+  // in your code that will be used by all path following commands.
+  HashMap<String, Command> eventMap = new HashMap<>();
+  eventMap.put("marker1", new PrintCommand("Passed marker 1"));
+
+  return new PPSwerveControllerCommand(
+          traj, 
+          pathState, // Pose supplier
+          this.kinematics, // SwerveDriveKinematics
+          new PIDController(0, 0, 0), // X controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
+          new PIDController(0, 0, 0), // Y controller (usually the same values as X controller)
+          new PIDController(0, 0, 0), // Rotation controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
+          pathFollower, // Module states consumer
+          eventMap, // This argument is optional if you don't use event markers
+          this // Requires this drive subsystem
+      );
   }
 }
