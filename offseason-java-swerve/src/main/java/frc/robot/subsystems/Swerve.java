@@ -137,9 +137,9 @@ public class Swerve extends SubsystemBase {
 
   // TODO check if these max speed values are reasonable and practical
   /** maximum strafe speed (meters per second) */
-  private static final double MAX_LINEAR_SPEED = 4.5;
+  private static final double MAX_LINEAR_SPEED = 5.4;
   /** maximum rotation speed (radians per second) */
-  private static final double MAX_ROTATION_SPEED = Math.PI * 0.5;
+  private static final double MAX_ROTATION_SPEED = Math.PI*2;
 
   /** WPILib swerve kinematics */
   private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(
