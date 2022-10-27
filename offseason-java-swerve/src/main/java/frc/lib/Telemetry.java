@@ -1,35 +1,53 @@
 package frc.lib;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-
-// right now, this just wraps the SmartDashboard class
-// but using this will allow easier migration to superior
-// systems in the future, either other implementations
-// of the network tables api or an entirely independant
-// system
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.NetworkTable;
 
 public class Telemetry {
-    public static void setValue ( String key, double value ) {
-        SmartDashboard.putNumber(key, value);
+    /**
+     * Fetched the default NetworkTable and works within the "telemetry" section of the table
+     * @return the NetworkTable object cotaining all telemetry data
+     */
+    private static NetworkTable getTelemetryTable () {
+        return NetworkTableInstance.getDefault().getTable("telemetry");
     }
 
-    public static void setValue ( String key, String value ) {
-        SmartDashboard.putString(key, value);
+    /** 
+     * Set a telemetry value on the NetworkTable
+     * @param key - the location to assign the value
+     * @param value - the value to assign to the key
+     */
+    public static void setValue ( String key, Object value ) {
+        getTelemetryTable().getEntry(key).setValue(value);
     }
 
-    public static void setValue ( String key, Boolean value ) {
-        SmartDashboard.putBoolean(key, value);
+    /**
+     * Get a telemetry value from the NetworkTable
+     * @param key - the location to fetch the data
+     * @param defaultValue - the default value to return if the data is absent
+     * @return the data at the given key or the default value if there is no data
+     */
+    public static double getValue ( String key, double defaultValue ) {
+        return getTelemetryTable().getEntry(key).getDouble(defaultValue);
     }
 
-    public static double getValue ( String key, Double defaultValue ) {
-        return SmartDashboard.getNumber(key, defaultValue);
-    }
-
+    /**
+     * Get a telemetry value from the NetworkTable
+     * @param key - the location to fetch the data
+     * @param defaultValue - the default value to return if the data is absent
+     * @return the data at the given key or the default value if there is no data
+     */
     public static String getValue ( String key, String defaultValue ) {
-        return SmartDashboard.getString(key, defaultValue);
+        return getTelemetryTable().getEntry(key).getString(defaultValue);
     }
 
-    public static Boolean getValue ( String key, Boolean defaultValue ) {
-        return SmartDashboard.getBoolean(key, defaultValue);
+    /**
+     * Get a telemetry value from the NetworkTable
+     * @param key - the location to fetch the data
+     * @param defaultValue - the default value to return if the data is absent
+     * @return the data at the given key or the default value if there is no data
+     */
+    public static boolean getValue ( String key, boolean defaultValue ) {
+        return getTelemetryTable().getEntry(key).getBoolean(defaultValue);
     }
 }
