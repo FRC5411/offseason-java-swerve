@@ -405,6 +405,7 @@ public Command followTrajectoryCommand(PathPlannerTrajectory traj) {
           traj, 
           pathState, // Pose supplier
           this.kinematics, // SwerveDriveKinematics
+          // TODO tune pathplanner position PID
           new PIDController(0, 0, 0), // X controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
           new PIDController(0, 0, 0), // Y controller (usually the same values as X controller)
           new PIDController(0, 0, 0), // Rotation controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
