@@ -391,13 +391,10 @@ public class Swerve extends SubsystemBase {
     return target;
   }
 
-  // Assuming this method is part of a drivetrain subsystem that provides the necessary methods
   public Command followTrajectoryCommand(PathPlannerTrajectory traj) {
 
     odometryOfficial.resetPosition(traj.getInitialHolonomicPose(), new Rotation2d(Math.toRadians(gyro.getYaw())));
 
-    // This is just an example event map. It would be better to have a constant, global event map
-    // in your code that will be used by all path following commands.
     HashMap<String, Command> eventMap = new HashMap<>();
     eventMap.put("marker1", new PrintCommand("Passed marker 1"));
 
