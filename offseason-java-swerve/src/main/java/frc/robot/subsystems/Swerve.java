@@ -156,8 +156,22 @@ public class Swerve extends SubsystemBase {
     return odometryOfficial.getEstimatedPosition();
   };
 
+  private double _translationKp = 0;
+  private double _translationKi = 0;
+  private double _translationKd = 0;
+  private double _rotationKp = 0;
+  private double _rotationKi = 0;
+  private double _rotationKd = 0;
+
   /** Creates a new ExampleSubsystem. */
   public Swerve(Pigeon2 pigeon) {
+
+    Telemetry.setValue("drivetrain/PathPlanner/constants/translationKp", 0);
+    Telemetry.setValue("drivetrain/PathPlanner/constants/translationKi", 0);
+    Telemetry.setValue("drivetrain/PathPlanner/constants/translationKd", 0);
+    Telemetry.setValue("drivetrain/PathPlanner/constants/rotationKp", 0);
+    Telemetry.setValue("drivetrain/PathPlanner/constants/rotationKi", 0);
+    Telemetry.setValue("drivetrain/PathPlanner/constants/rotationKd", 0);
 
     gyro = pigeon;
 
@@ -185,6 +199,13 @@ public class Swerve extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+
+    _translationKp = Telemetry.getValue("drivetrain/PathPlanner/constants/translationKp", 0);
+    _translationKi = Telemetry.getValue("drivetrain/PathPlanner/constants/translationKi", 0);
+    _translationKd = Telemetry.getValue("drivetrain/PathPlanner/constants/translationKd", 0);
+    _rotationKp = Telemetry.getValue("drivetrain/PathPlanner/constants/rotationKp", 0);
+    _rotationKi = Telemetry.getValue("drivetrain/PathPlanner/constants/rotationKi", 0);
+    _rotationKd = Telemetry.getValue("drivetrain/PathPlanner/constants/rotationKd", 0);
 
     // 'actual' read sensor positions of each module
     FL_Actual_Position = ((FL_Azimuth.getSelectedSensorPosition() / 4096) * 360) % 360;
@@ -403,9 +424,9 @@ public class Swerve extends SubsystemBase {
       pathState, // Pose supplier
       this.kinematics, // SwerveDriveKinematics
       // TODO tune pathplanner position PID
-      new PIDController(0, 0, 0), // X controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
-      new PIDController(0, 0, 0), // Y controller (usually the same values as X controller)
-      new PIDController(0, 0, 0), // Rotation controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
+      new PIDController(_translationKp, _translationKi, _translationKd), // X controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
+      new PIDController(_translationKp, _translationKi, _translationKd), // Y controller (usually the same values as X controller)
+      new PIDController(_rotationKp, _rotationKi, _rotationKd), // Rotation controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
       pathFollower, // Module states consumer
       eventMap, // This argument is optional if you don't use event markers
       this // Requires this drive subsystem
