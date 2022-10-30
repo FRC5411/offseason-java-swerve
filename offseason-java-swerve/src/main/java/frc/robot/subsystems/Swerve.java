@@ -18,8 +18,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.HashMap;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
@@ -148,22 +146,22 @@ public class Swerve extends SubsystemBase {
   );
   private Pose2d _robotPose = new Pose2d();
 
-  private double _translationKp = 0;
+  private double _translationKp = 1;
   private double _translationKi = 0;
   private double _translationKd = 0;
-  private double _rotationKp = 0;
+  private double _rotationKp = 1;
   private double _rotationKi = 0;
   private double _rotationKd = 0;
 
   /** Creates a new ExampleSubsystem. */
   public Swerve(Pigeon2 pigeon) {
 
-    Telemetry.setValue("drivetrain/PathPlanner/constants/translationKp", 0);
-    Telemetry.setValue("drivetrain/PathPlanner/constants/translationKi", 0);
-    Telemetry.setValue("drivetrain/PathPlanner/constants/translationKd", 0);
-    Telemetry.setValue("drivetrain/PathPlanner/constants/rotationKp", 0);
-    Telemetry.setValue("drivetrain/PathPlanner/constants/rotationKi", 0);
-    Telemetry.setValue("drivetrain/PathPlanner/constants/rotationKd", 0);
+    Telemetry.setValue("drivetrain/PathPlanner/constants/translationKp", _translationKp);
+    Telemetry.setValue("drivetrain/PathPlanner/constants/translationKi", _translationKi);
+    Telemetry.setValue("drivetrain/PathPlanner/constants/translationKd", _translationKd);
+    Telemetry.setValue("drivetrain/PathPlanner/constants/rotationKp", _rotationKp);
+    Telemetry.setValue("drivetrain/PathPlanner/constants/rotationKi", _rotationKi);
+    Telemetry.setValue("drivetrain/PathPlanner/constants/rotationKd", _rotationKd);
 
     gyro = pigeon;
 
