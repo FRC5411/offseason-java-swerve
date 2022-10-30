@@ -148,14 +148,6 @@ public class Swerve extends SubsystemBase {
   );
   private Pose2d _robotPose = new Pose2d();
 
-  private Consumer<SwerveModuleState[]> pathFollower = modules -> {
-    driveFromModuleStates( modules);
-  };
-
-  private Supplier<Pose2d> pathState = () -> {
-    return odometryOfficial.getEstimatedPosition();
-  };
-
   private double _translationKp = 0;
   private double _translationKi = 0;
   private double _translationKd = 0;
@@ -193,7 +185,7 @@ public class Swerve extends SubsystemBase {
     configAzimuth(BL_Azimuth, BL_Position);
     configAzimuth(BR_Azimuth, BR_Position);
 
-    PathPlannerServer.startServer(6969); // 5811 = port number. adjust this according to your needs
+    PathPlannerServer.startServer(6969);
   }
 
   @Override
@@ -421,13 +413,13 @@ public class Swerve extends SubsystemBase {
 
     return new PPSwerveControllerCommand(
       traj, 
-      pathState, // Pose supplier
+      () -> odometryOfficial.getEstimatedPosition(), // Pose supplier
       this.kinematics, // SwerveDriveKinematics
       // TODO tune pathplanner position PID
       new PIDController(_translationKp, _translationKi, _translationKd), // X controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
       new PIDController(_translationKp, _translationKi, _translationKd), // Y controller (usually the same values as X controller)
       new PIDController(_rotationKp, _rotationKi, _rotationKd), // Rotation controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
-      pathFollower, // Module states consumer
+      modules -> driveFromModuleStates(modules), // Module states consumer
       eventMap, // This argument is optional if you don't use event markers
       this // Requires this drive subsystem
     );
