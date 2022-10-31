@@ -31,8 +31,6 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final Swerve m_swerve = new Swerve(pigeon);
 
-  private final Command m_autoCommand = m_swerve.followTrajectoryCommand(PathPlanner.loadPath("Test Path", new PathConstraints(4, 3)));
-
   JoystickButton aButton = new JoystickButton(driver, 1);
   JoystickButton bButton = new JoystickButton(driver, 2);
 
@@ -64,6 +62,6 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand() {
     // An ExampleCommand will run in autonomous
-    return m_autoCommand;
+    return m_swerve.followTrajectoryCommand(PathPlanner.loadPath("Test Path", new PathConstraints(4, 3)));
   }
 }
