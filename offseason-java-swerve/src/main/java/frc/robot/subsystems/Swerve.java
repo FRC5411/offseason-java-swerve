@@ -18,8 +18,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.HashMap;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
@@ -32,7 +30,6 @@ import com.ctre.phoenix.sensors.SensorInitializationStrategy;
 import com.pathplanner.lib.PathPlannerTrajectory;
 import com.pathplanner.lib.commands.PPSwerveControllerCommand;
 import com.pathplanner.lib.server.PathPlannerServer;
-
 import frc.lib.Telemetry;
 
 /** 
@@ -148,30 +145,22 @@ public class Swerve extends SubsystemBase {
   );
   private Pose2d _robotPose = new Pose2d();
 
-  private Consumer<SwerveModuleState[]> pathFollower = modules -> {
-    driveFromModuleStates( modules);
-  };
-
-  private Supplier<Pose2d> pathState = () -> {
-    return odometryOfficial.getEstimatedPosition();
-  };
-
-  private double _translationKp = 0;
+  private double _translationKp = 1;
   private double _translationKi = 0;
   private double _translationKd = 0;
-  private double _rotationKp = 0;
+  private double _rotationKp = 1;
   private double _rotationKi = 0;
   private double _rotationKd = 0;
 
   /** Creates a new ExampleSubsystem. */
   public Swerve(Pigeon2 pigeon) {
 
-    Telemetry.setValue("drivetrain/PathPlanner/constants/translationKp", 0);
-    Telemetry.setValue("drivetrain/PathPlanner/constants/translationKi", 0);
-    Telemetry.setValue("drivetrain/PathPlanner/constants/translationKd", 0);
-    Telemetry.setValue("drivetrain/PathPlanner/constants/rotationKp", 0);
-    Telemetry.setValue("drivetrain/PathPlanner/constants/rotationKi", 0);
-    Telemetry.setValue("drivetrain/PathPlanner/constants/rotationKd", 0);
+    Telemetry.setValue("drivetrain/PathPlanner/constants/translationKp", _translationKp);
+    Telemetry.setValue("drivetrain/PathPlanner/constants/translationKi", _translationKi);
+    Telemetry.setValue("drivetrain/PathPlanner/constants/translationKd", _translationKd);
+    Telemetry.setValue("drivetrain/PathPlanner/constants/rotationKp", _rotationKp);
+    Telemetry.setValue("drivetrain/PathPlanner/constants/rotationKi", _rotationKi);
+    Telemetry.setValue("drivetrain/PathPlanner/constants/rotationKd", _rotationKd);
 
     gyro = pigeon;
 
@@ -193,7 +182,7 @@ public class Swerve extends SubsystemBase {
     configAzimuth(BL_Azimuth, BL_Position);
     configAzimuth(BR_Azimuth, BR_Position);
 
-    PathPlannerServer.startServer(6969); // 5811 = port number. adjust this according to your needs
+    PathPlannerServer.startServer(6969);
   }
 
   @Override
@@ -421,13 +410,13 @@ public class Swerve extends SubsystemBase {
 
     return new PPSwerveControllerCommand(
       traj, 
-      pathState, // Pose supplier
+      () -> odometryOfficial.getEstimatedPosition(), // Pose supplier
       this.kinematics, // SwerveDriveKinematics
       // TODO tune pathplanner position PID
       new PIDController(_translationKp, _translationKi, _translationKd), // X controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
       new PIDController(_translationKp, _translationKi, _translationKd), // Y controller (usually the same values as X controller)
       new PIDController(_rotationKp, _rotationKi, _rotationKd), // Rotation controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
-      pathFollower, // Module states consumer
+      modules -> driveFromModuleStates(modules), // Module states consumer
       eventMap, // This argument is optional if you don't use event markers
       this // Requires this drive subsystem
     );
