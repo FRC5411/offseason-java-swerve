@@ -147,10 +147,10 @@ public class Swerve extends SubsystemBase {
 
   private double _translationKp = 1;
   private double _translationKi = 0;
-  private double _translationKd = 0;
+  private double _translationKd = 0.75;
   private double _rotationKp = 1;
   private double _rotationKi = 0;
-  private double _rotationKd = 0;
+  private double _rotationKd = 1;
 
   /** Creates a new ExampleSubsystem. */
   public Swerve(Pigeon2 pigeon) {
