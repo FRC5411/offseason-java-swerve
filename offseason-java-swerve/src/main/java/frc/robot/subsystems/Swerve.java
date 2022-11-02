@@ -412,7 +412,6 @@ public class Swerve extends SubsystemBase {
       traj, 
       () -> odometryOfficial.getEstimatedPosition(), // Pose supplier
       this.kinematics, // SwerveDriveKinematics
-      // TODO tune pathplanner position PID
       new PIDController(_translationKp, _translationKi, _translationKd), // X controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
       new PIDController(_translationKp, _translationKi, _translationKd), // Y controller (usually the same values as X controller)
       new PIDController(_rotationKp, _rotationKi, _rotationKd), // Rotation controller. Tune these values for your robot. Leaving them 0 will only use feedforwards.
